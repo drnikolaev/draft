@@ -441,6 +441,9 @@ converted to \tcode{double}.
 \item Otherwise, if either operand is \tcode{float}, the other shall be
 converted to \tcode{float}.
 
+\item Otherwise, if either operand is \tcode{short float}, the other shall be
+converted to \tcode{short float}.
+
 \item Otherwise, the integral promotions\iref{conv.prom} shall be
 performed on both operands.\footnote{As a consequence, operands of type \tcode{bool}, \tcode{char16_t},
 \tcode{char32_t}, \tcode{wchar_t}, or an enumerated type are converted

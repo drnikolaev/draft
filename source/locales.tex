@@ -2371,6 +2371,8 @@ namespace std {
       iter_type get(iter_type in, iter_type end, ios_base&,
                     ios_base::iostate& err, unsigned long long& v) const;
       iter_type get(iter_type in, iter_type end, ios_base&,
+                    ios_base::iostate& err, short float& v) const;
+      iter_type get(iter_type in, iter_type end, ios_base&,
                     ios_base::iostate& err, float& v) const;
       iter_type get(iter_type in, iter_type end, ios_base&,
                     ios_base::iostate& err, double& v) const;
@@ -2397,6 +2399,8 @@ namespace std {
                                ios_base::iostate& err, unsigned long& v) const;
       virtual iter_type do_get(iter_type, iter_type, ios_base&,
                                ios_base::iostate& err, unsigned long long& v) const;
+      virtual iter_type do_get(iter_type, iter_type, ios_base&,
+                               ios_base::iostate& err, short float& v) const;
       virtual iter_type do_get(iter_type, iter_type, ios_base&,
                                ios_base::iostate& err, float& v) const;
       virtual iter_type do_get(iter_type, iter_type, ios_base&,
@@ -2433,6 +2437,8 @@ iter_type get(iter_type in, iter_type end, ios_base& str,
 iter_type get(iter_type in, iter_type end, ios_base& str,
               ios_base::iostate& err, unsigned long long& val) const;
 iter_type get(iter_type in, iter_type end, ios_base& str,
+              ios_base::iostate& err, short float& val) const;
+iter_type get(iter_type in, iter_type end, ios_base& str,
               ios_base::iostate& err, float& val) const;
 iter_type get(iter_type in, iter_type end, ios_base& str,
               ios_base::iostate& err, double& val) const;
@@ -2464,6 +2470,8 @@ iter_type do_get(iter_type in, iter_type end, ios_base& str,
                 ios_base::iostate& err, unsigned long& val) const;
 iter_type do_get(iter_type in, iter_type end, ios_base& str,
                 ios_base::iostate& err, unsigned long long& val) const;
+iter_type do_get(iter_type in, iter_type end, ios_base& str,
+                ios_base::iostate& err, short float& val) const;
 iter_type do_get(iter_type in, iter_type end, ios_base& str,
                 ios_base::iostate& err, float& val) const;
 iter_type do_get(iter_type in, iter_type end, ios_base& str,
@@ -2618,6 +2626,8 @@ The sequence of \tcode{char}{s} accumulated in stage 2 (the field) is converted 
 \item For a signed integer value, the function \tcode{strtoll}.
 
 \item For an unsigned integer value, the function \tcode{strtoull}.
+
+\item For a \tcode{short float} value, the function \tcode{strtosf}.
 
 \item For a \tcode{float} value, the function \tcode{strtof}.
 
