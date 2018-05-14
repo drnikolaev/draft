@@ -3968,7 +3968,9 @@ ones' complement and signed magnitude representations for integral types.
 \end{example}
 
 \pnum
-There are three \defnx{floating-point types}{type!floating-point}:
+There are four \defnx{floating-point types}{type!floating-point}:
+\indextext{type!\idxcode{short float}}%
+\tcode{short float},
 \indextext{type!\idxcode{float}}%
 \tcode{float},
 \indextext{type!\idxcode{double}}%
@@ -3976,10 +3978,14 @@ There are three \defnx{floating-point types}{type!floating-point}:
 and
 \indextext{type!\idxcode{long double}}%
 \tcode{long double}. The type \tcode{double} provides at least as much
-precision as \tcode{float}, and the type \tcode{long double} provides at
+precision as \tcode{float}, the type \tcode{float} provides at least as much
+precision as \tcode{short float}, and the type \tcode{long double} provides at
 least as much precision as \tcode{double}. The set of values of the type
 \tcode{float} is a subset of the set of values of the type
-\tcode{double}; the set of values of the type \tcode{double} is a subset
+\tcode{double};
+the set of values of the type \tcode{short float} is a subset
+of the set of values of the type \tcode{float};
+the set of values of the type \tcode{double} is a subset
 of the set of values of the type \tcode{long double}. The value
 representation of floating-point types is \impldef{value representation of
 floating-point types}.

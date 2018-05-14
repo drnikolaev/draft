@@ -257,8 +257,10 @@ and numerous functions for representing and manipulating complex numbers.
 \pnum
 The effect of instantiating the template
 \tcode{complex}
-for any type other than \tcode{float}, \tcode{double}, or \tcode{long double} is unspecified.
+for any type other than \tcode{short float},
+\tcode{float}, \tcode{double}, or \tcode{long double} is unspecified.
 The specializations
+\tcode{complex<short float>},
 \tcode{complex<float>},
 \tcode{complex<double>}, and
 \tcode{complex<long double>} are literal types\iref{basic.types}.
@@ -293,6 +295,7 @@ namespace std {
   template<class T> class complex;
 
   // \ref{complex.special}, \tcode{complex} specializations
+  template<> class complex<short float>;
   template<> class complex<float>;
   template<> class complex<double>;
   template<> class complex<long double>;
@@ -377,6 +380,8 @@ namespace std {
     constexpr complex<double> operator""i(unsigned long long);
     constexpr complex<float> operator""if(long double);
     constexpr complex<float> operator""if(unsigned long long);
+    constexpr complex<short float> operator""isf(long double);
+    constexpr complex<short float> operator""isf(unsigned long long);
   }
   }
 }
@@ -432,11 +437,41 @@ number.
 
 \begin{codeblock}
 namespace std {
+  template<> class complex<short float> {
+  public:
+
+    using value_type = short float;
+
+    constexpr complex(short float re = 0.0sf, short float im = 0.0sf);
+    constexpr explicit complex(const complex<float>&);
+    constexpr explicit complex(const complex<double>&);
+    constexpr explicit complex(const complex<long double>&);
+
+    constexpr short float real() const;
+    void real(short float);
+    constexpr short float imag() const;
+    void imag(short float);
+
+    complex<short float>& operator= (short float);
+    complex<short float>& operator+=(short float);
+    complex<short float>& operator-=(short float);
+    complex<short float>& operator*=(short float);
+    complex<short float>& operator/=(short float);
+
+    complex<short float>& operator=(const complex<short float>&);
+    template<class X> complex<short float>& operator= (const complex<X>&);
+    template<class X> complex<short float>& operator+=(const complex<X>&);
+    template<class X> complex<short float>& operator-=(const complex<X>&);
+    template<class X> complex<short float>& operator*=(const complex<X>&);
+    template<class X> complex<short float>& operator/=(const complex<X>&);
+  };
+
   template<> class complex<float> {
   public:
     using value_type = float;
 
     constexpr complex(float re = 0.0f, float im = 0.0f);
+    constexpr complex(const complex<short float>&);
     constexpr explicit complex(const complex<double>&);
     constexpr explicit complex(const complex<long double>&);
 
@@ -464,6 +499,7 @@ namespace std {
     using value_type = double;
 
     constexpr complex(double re = 0.0, double im = 0.0);
+    constexpr complex(const complex<short float>&);
     constexpr complex(const complex<float>&);
     constexpr explicit complex(const complex<long double>&);
 
@@ -491,6 +527,7 @@ namespace std {
     using value_type = long double;
 
     constexpr complex(long double re = 0.0L, long double im = 0.0L);
+    constexpr complex(const complex<short float>&);
     constexpr complex(const complex<float>&);
     constexpr complex(const complex<double>&);
 
@@ -1294,6 +1331,8 @@ The additional overloads shall be sufficient to ensure:
               then it is effectively cast to \tcode{complex<\brk{}double>}.
         \item Otherwise, if the argument has type \tcode{float}, then it is
               effectively cast to \tcode{complex<float>}.
+        \item Otherwise, if the argument has type \tcode{short float}, then it is
+              effectively cast to \tcode{complex<short float>}.
 \end{itemize}
 
 \pnum
@@ -1311,6 +1350,9 @@ ensure, for a call with at least one argument of type \tcode{complex<T>}:
         \tcode{complex<double>}.
   \item Otherwise, if either argument has type \tcode{complex<float>} or \tcode{float},
         then both arguments are effectively cast to \tcode{complex<float>}.
+  \item Otherwise, if either argument has type \tcode{complex<short float>} or
+        \tcode{short float}, then both arguments are effectively cast to
+        \tcode{complex<short float>}.
 \end{itemize}
 
 \rSec2[complex.literals]{Suffixes for complex number literals}
@@ -1319,9 +1361,9 @@ ensure, for a call with at least one argument of type \tcode{complex<T>}:
 \indexlibrary{\tcode{complex}!literals}%
 \pnum
 This subclause describes literal suffixes for constructing complex number literals.
-The suffixes \tcode{i}, \tcode{il}, and \tcode{if} create complex numbers of
-the types \tcode{complex<double>}, \tcode{complex<long double>}, and
-\tcode{complex<float>} respectively, with their imaginary part denoted by the
+The suffixes \tcode{i}, \tcode{il}, \tcode{if} and \tcode{isf} create complex numbers of
+the types \tcode{complex<double>}, \tcode{complex<long double>}, \tcode{complex<float>} and
+\tcode{complex<short float>} respectively, with their imaginary part denoted by the
 given literal number and the real part being zero.
 
 \indexlibrarymember{operator""""il}{complex}%
@@ -1358,6 +1400,18 @@ constexpr complex<float> operator""if(unsigned long long d);
 \pnum
 \returns
 \tcode{complex<float>\{0.0f, static_cast<float>(d)\}}.
+\end{itemdescr}
+
+\indexlibrarymember{operator""""isf}{complex}%
+\begin{itemdecl}
+constexpr complex<short float> operator""isf(long double d);
+constexpr complex<short float> operator""isf(unsigned long long d);
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns
+\tcode{complex<short float>\{0.0sf, static_cast<short float>(d)\}}.
 \end{itemdescr}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1509,7 +1563,7 @@ the effect of instantiating a template:
     is undefined unless the corresponding template argument
     is cv-unqualified and
     is one of
-    \tcode{float}, \tcode{double}, or \tcode{long double}.
+    \tcode{short float}, \tcode{float}, \tcode{double}, or \tcode{long double}.
   \item
     that has a template type parameter
     named \tcode{IntType}
@@ -9747,6 +9801,7 @@ Nothing.
 \indexlibrary{\idxcode{fdim}}%
 \indexlibrary{\idxcode{fdimf}}%
 \indexlibrary{\idxcode{fdiml}}%
+\indexlibrary{\idxcode{short_float_t}}%
 \indexlibrary{\idxcode{float_t}}%
 \indexlibrary{\idxcode{floor}}%
 \indexlibrary{\idxcode{floorf}}%
@@ -9877,6 +9932,7 @@ Nothing.
 \indexlibrary{\idxcode{truncl}}%
 \begin{codeblock}
 namespace std {
+  using short_float_t = @\seebelow@;
   using float_t = @\seebelow@;
   using double_t = @\seebelow@;
 }
@@ -9905,120 +9961,140 @@ namespace std {
   float acos(float x);  // see \ref{library.c}
   double acos(double x);
   long double acos(long double x);  // see \ref{library.c}
+  short float acossf(short float x);
   float acosf(float x);
   long double acosl(long double x);
 
   float asin(float x);  // see \ref{library.c}
   double asin(double x);
   long double asin(long double x);  // see \ref{library.c}
+  short float asinsf(short float x);
   float asinf(float x);
   long double asinl(long double x);
 
   float atan(float x);  // see \ref{library.c}
   double atan(double x);
   long double atan(long double x);  // see \ref{library.c}
+  short float atansf(short float x);
   float atanf(float x);
   long double atanl(long double x);
 
   float atan2(float y, float x);  // see \ref{library.c}
   double atan2(double y, double x);
   long double atan2(long double y, long double x);  // see \ref{library.c}
+  short float atan2sf(short float x);
   float atan2f(float y, float x);
   long double atan2l(long double y, long double x);
 
   float cos(float x);  // see \ref{library.c}
   double cos(double x);
   long double cos(long double x);  // see \ref{library.c}
+  short float cossf(short float x);
   float cosf(float x);
   long double cosl(long double x);
 
   float sin(float x);  // see \ref{library.c}
   double sin(double x);
   long double sin(long double x);  // see \ref{library.c}
+  short float sinsf(short float x);
   float sinf(float x);
   long double sinl(long double x);
 
   float tan(float x);  // see \ref{library.c}
   double tan(double x);
   long double tan(long double x);  // see \ref{library.c}
+  short float tansf(short float x);
   float tanf(float x);
   long double tanl(long double x);
 
   float acosh(float x);  // see \ref{library.c}
   double acosh(double x);
   long double acosh(long double x);  // see \ref{library.c}
+  short float acoshsf(short float x);
   float acoshf(float x);
   long double acoshl(long double x);
 
   float asinh(float x);  // see \ref{library.c}
   double asinh(double x);
   long double asinh(long double x);  // see \ref{library.c}
+  short float asinhsf(short float x);
   float asinhf(float x);
   long double asinhl(long double x);
 
   float atanh(float x);  // see \ref{library.c}
   double atanh(double x);
   long double atanh(long double x);  // see \ref{library.c}
+  short float atanhsf(short float x);
   float atanhf(float x);
   long double atanhl(long double x);
 
   float cosh(float x);  // see \ref{library.c}
   double cosh(double x);
   long double cosh(long double x);  // see \ref{library.c}
+  short float coshsf(short float x);
   float coshf(float x);
   long double coshl(long double x);
 
   float sinh(float x);  // see \ref{library.c}
   double sinh(double x);
   long double sinh(long double x);  // see \ref{library.c}
+  short float sinhsf(short float x);
   float sinhf(float x);
   long double sinhl(long double x);
 
   float tanh(float x);  // see \ref{library.c}
   double tanh(double x);
   long double tanh(long double x);  // see \ref{library.c}
+  short float tanhsf(short float x);
   float tanhf(float x);
   long double tanhl(long double x);
 
   float exp(float x);  // see \ref{library.c}
   double exp(double x);
   long double exp(long double x);  // see \ref{library.c}
+  short float expsf(short float x);
   float expf(float x);
   long double expl(long double x);
 
   float exp2(float x);  // see \ref{library.c}
   double exp2(double x);
   long double exp2(long double x);  // see \ref{library.c}
+  short float exp2sf(short float x);
   float exp2f(float x);
   long double exp2l(long double x);
 
   float expm1(float x);  // see \ref{library.c}
   double expm1(double x);
   long double expm1(long double x);  // see \ref{library.c}
+  short float expm1sf(short float x);
   float expm1f(float x);
   long double expm1l(long double x);
 
   float frexp(float value, int* exp);  // see \ref{library.c}
   double frexp(double value, int* exp);
   long double frexp(long double value, int* exp);  // see \ref{library.c}
+  short float frexpsf(short float x);
   float frexpf(float value, int* exp);
   long double frexpl(long double value, int* exp);
 
   int ilogb(float x);  // see \ref{library.c}
   int ilogb(double x);
   int ilogb(long double x);  // see \ref{library.c}
+  int ilogbsf(short float x);
   int ilogbf(float x);
   int ilogbl(long double x);
 
   float ldexp(float x, int exp);  // see \ref{library.c}
   double ldexp(double x, int exp);
   long double ldexp(long double x, int exp);  // see \ref{library.c}
+  short float ldexpsf(short float x, int exp);
   float ldexpf(float x, int exp);
   long double ldexpl(long double x, int exp);
 
   float log(float x);  // see \ref{library.c}
   double log(double x);
   long double log(long double x);  // see \ref{library.c}
+  short float logsf(short float x);
   float logf(float x);
   long double logl(long double x);
 
@@ -10026,47 +10102,55 @@ namespace std {
   double log10(double x);
   long double log10(long double x);  // see \ref{library.c}
   float log10f(float x);
+  short float log10sf(short float x);
   long double log10l(long double x);
 
   float log1p(float x);  // see \ref{library.c}
   double log1p(double x);
   long double log1p(long double x);  // see \ref{library.c}
+  short float log1psf(short float x);
   float log1pf(float x);
   long double log1pl(long double x);
 
   float log2(float x);  // see \ref{library.c}
   double log2(double x);
   long double log2(long double x);  // see \ref{library.c}
+  short float log2sf(short float x);
   float log2f(float x);
   long double log2l(long double x);
 
   float logb(float x);  // see \ref{library.c}
   double logb(double x);
   long double logb(long double x);  // see \ref{library.c}
+  short float logbsf(short float x);
   float logbf(float x);
   long double logbl(long double x);
 
   float modf(float value, float* iptr);  // see \ref{library.c}
   double modf(double value, double* iptr);
   long double modf(long double value, long double* iptr);  // see \ref{library.c}
+  short float modfsf(short float value, float* iptr);
   float modff(float value, float* iptr);
   long double modfl(long double value, long double* iptr);
 
   float scalbn(float x, int n);  // see \ref{library.c}
   double scalbn(double x, int n);
   long double scalbn(long double x, int n);  // see \ref{library.c}
+  short float scalbnsf(short float x, int n);
   float scalbnf(float x, int n);
   long double scalbnl(long double x, int n);
 
   float scalbln(float x, long int n);  // see \ref{library.c}
   double scalbln(double x, long int n);
   long double scalbln(long double x, long int n);  // see \ref{library.c}
+  short float scalblnsf(short float x, long int n);
   float scalblnf(float x, long int n);
   long double scalblnl(long double x, long int n);
 
   float cbrt(float x);  // see \ref{library.c}
   double cbrt(double x);
   long double cbrt(long double x);  // see \ref{library.c}
+  short float cbrtsf(short float x);
   float cbrtf(float x);
   long double cbrtl(long double x);
 
@@ -10074,6 +10158,7 @@ namespace std {
   int abs(int j);
   long int abs(long int j);
   long long int abs(long long int j);
+  short float abs(short float j);
   float abs(float j);
   double abs(double j);
   long double abs(long double j);
@@ -10081,16 +10166,19 @@ namespace std {
   float fabs(float x);  // see \ref{library.c}
   double fabs(double x);
   long double fabs(long double x);  // see \ref{library.c}
+  short float fabssf(short float x);
   float fabsf(float x);
   long double fabsl(long double x);
 
   float hypot(float x, float y);  // see \ref{library.c}
   double hypot(double x, double y);
   long double hypot(long double x, long double y);  // see \ref{library.c}
+  short float hypotsf(short float x, short float y);
   float hypotf(float x, float y);
   long double hypotl(long double x, long double y);
 
   // \ref{c.math.hypot3}, three-dimensional hypotenuse
+  short float hypot(short float x, short float y, short float z);
   float hypot(float x, float y, float z);
   double hypot(double x, double y, double z);
   long double hypot(long double x, long double y, long double z);
@@ -10098,208 +10186,247 @@ namespace std {
   float pow(float x, float y);  // see \ref{library.c}
   double pow(double x, double y);
   long double pow(long double x, long double y);  // see \ref{library.c}
+  short float powsf(short float x, short float y);
   float powf(float x, float y);
   long double powl(long double x, long double y);
 
   float sqrt(float x);  // see \ref{library.c}
   double sqrt(double x);
   long double sqrt(long double x);  // see \ref{library.c}
+  short float sqrtsf(short float x);
   float sqrtf(float x);
   long double sqrtl(long double x);
 
   float erf(float x);  // see \ref{library.c}
   double erf(double x);
   long double erf(long double x);  // see \ref{library.c}
+  short float erfsf(short float x);
   float erff(float x);
   long double erfl(long double x);
 
   float erfc(float x);  // see \ref{library.c}
   double erfc(double x);
   long double erfc(long double x);  // see \ref{library.c}
+  short float erfcsf(short float x);
   float erfcf(float x);
   long double erfcl(long double x);
 
   float lgamma(float x);  // see \ref{library.c}
   double lgamma(double x);
   long double lgamma(long double x);  // see \ref{library.c}
+  short float lgammasf(short float x);
   float lgammaf(float x);
   long double lgammal(long double x);
 
   float tgamma(float x);  // see \ref{library.c}
   double tgamma(double x);
   long double tgamma(long double x);  // see \ref{library.c}
+  short float tgammasf(short float x);
   float tgammaf(float x);
   long double tgammal(long double x);
 
   float ceil(float x);  // see \ref{library.c}
   double ceil(double x);
   long double ceil(long double x);  // see \ref{library.c}
+  short float ceilsf(short float x);
   float ceilf(float x);
   long double ceill(long double x);
 
   float floor(float x);  // see \ref{library.c}
   double floor(double x);
   long double floor(long double x);  // see \ref{library.c}
+  short float floorsf(short float x);
   float floorf(float x);
   long double floorl(long double x);
 
   float nearbyint(float x);  // see \ref{library.c}
   double nearbyint(double x);
   long double nearbyint(long double x);  // see \ref{library.c}
+  short float nearbyintsf(short float x);
   float nearbyintf(float x);
   long double nearbyintl(long double x);
 
   float rint(float x);  // see \ref{library.c}
   double rint(double x);
   long double rint(long double x);  // see \ref{library.c}
+  short float rintsf(short float x);
   float rintf(float x);
   long double rintl(long double x);
 
   long int lrint(float x);  // see \ref{library.c}
   long int lrint(double x);
   long int lrint(long double x);  // see \ref{library.c}
+  long int lrintsf(short float x);
   long int lrintf(float x);
   long int lrintl(long double x);
 
   long long int llrint(float x);  // see \ref{library.c}
   long long int llrint(double x);
   long long int llrint(long double x);  // see \ref{library.c}
+  long long int llrintsf(short float x);
   long long int llrintf(float x);
   long long int llrintl(long double x);
 
   float round(float x);  // see \ref{library.c}
   double round(double x);
   long double round(long double x);  // see \ref{library.c}
+  short float roundsf(short float x);
   float roundf(float x);
   long double roundl(long double x);
 
   long int lround(float x);  // see \ref{library.c}
   long int lround(double x);
   long int lround(long double x);  // see \ref{library.c}
+  long int lroundsf(short float x);
   long int lroundf(float x);
   long int lroundl(long double x);
 
   long long int llround(float x);  // see \ref{library.c}
   long long int llround(double x);
   long long int llround(long double x);  // see \ref{library.c}
+  long long int llroundsf(short float x);
   long long int llroundf(float x);
   long long int llroundl(long double x);
 
   float trunc(float x);  // see \ref{library.c}
   double trunc(double x);
   long double trunc(long double x);  // see \ref{library.c}
+  short float truncsf(short float x);
   float truncf(float x);
   long double truncl(long double x);
 
   float fmod(float x, float y);  // see \ref{library.c}
   double fmod(double x, double y);
   long double fmod(long double x, long double y);  // see \ref{library.c}
+  short float fmodsf(short float x, short float y);
   float fmodf(float x, float y);
   long double fmodl(long double x, long double y);
 
   float remainder(float x, float y);  // see \ref{library.c}
   double remainder(double x, double y);
   long double remainder(long double x, long double y);  // see \ref{library.c}
+  short float remaindersf(short float x, short float y);
   float remainderf(float x, float y);
   long double remainderl(long double x, long double y);
 
   float remquo(float x, float y, int* quo);  // see \ref{library.c}
   double remquo(double x, double y, int* quo);
   long double remquo(long double x, long double y, int* quo);  // see \ref{library.c}
+  short float remquosf(short float x, short float y, int* quo);
   float remquof(float x, float y, int* quo);
   long double remquol(long double x, long double y, int* quo);
 
   float copysign(float x, float y);  // see \ref{library.c}
   double copysign(double x, double y);
   long double copysign(long double x, long double y);  // see \ref{library.c}
+  short float copysignsf(short float x, short float y);
   float copysignf(float x, float y);
   long double copysignl(long double x, long double y);
 
   double nan(const char* tagp);
+  short float nansf(const char* tagp);
   float nanf(const char* tagp);
   long double nanl(const char* tagp);
 
   float nextafter(float x, float y);  // see \ref{library.c}
   double nextafter(double x, double y);
   long double nextafter(long double x, long double y);  // see \ref{library.c}
+  short float nextaftersf(short float x, short float y);
   float nextafterf(float x, float y);
   long double nextafterl(long double x, long double y);
 
   float nexttoward(float x, long double y);  // see \ref{library.c}
   double nexttoward(double x, long double y);
   long double nexttoward(long double x, long double y);  // see \ref{library.c}
+  short float nexttowardsf(short float x, long double y);
   float nexttowardf(float x, long double y);
   long double nexttowardl(long double x, long double y);
 
   float fdim(float x, float y);  // see \ref{library.c}
   double fdim(double x, double y);
   long double fdim(long double x, long double y);  // see \ref{library.c}
+  short float fdimsf(short float x, short float y);
   float fdimf(float x, float y);
   long double fdiml(long double x, long double y);
 
   float fmax(float x, float y);  // see \ref{library.c}
   double fmax(double x, double y);
   long double fmax(long double x, long double y);  // see \ref{library.c}
+  short float fmaxsf(short float x, short float y);
   float fmaxf(float x, float y);
   long double fmaxl(long double x, long double y);
 
   float fmin(float x, float y);  // see \ref{library.c}
   double fmin(double x, double y);
   long double fmin(long double x, long double y);  // see \ref{library.c}
+  short float fminsf(short float x, short float y);
   float fminf(float x, float y);
   long double fminl(long double x, long double y);
 
   float fma(float x, float y, float z);  // see \ref{library.c}
   double fma(double x, double y, double z);
   long double fma(long double x, long double y, long double z);  // see \ref{library.c}
+  short float fmaf(short float x, short float y, short float z);
   float fmaf(float x, float y, float z);
   long double fmal(long double x, long double y, long double z);
 
   // \ref{c.math.fpclass}, classification / comparison functions
+  int fpclassify(short float x);
   int fpclassify(float x);
   int fpclassify(double x);
   int fpclassify(long double x);
 
+  bool isfinite(short float x);
   bool isfinite(float x);
   bool isfinite(double x);
   bool isfinite(long double x);
 
+  bool isinf(short float x);
   bool isinf(float x);
   bool isinf(double x);
   bool isinf(long double x);
 
+  bool isnan(short float x);
   bool isnan(float x);
   bool isnan(double x);
   bool isnan(long double x);
 
+  bool isnormal(short float x);
   bool isnormal(float x);
   bool isnormal(double x);
   bool isnormal(long double x);
 
+  bool signbit(short float x);
   bool signbit(float x);
   bool signbit(double x);
   bool signbit(long double x);
 
+  bool isgreater(short float x, short float y);
   bool isgreater(float x, float y);
   bool isgreater(double x, double y);
   bool isgreater(long double x, long double y);
 
+  bool isgreaterequal(short float x, short float y);
   bool isgreaterequal(float x, float y);
   bool isgreaterequal(double x, double y);
   bool isgreaterequal(long double x, long double y);
 
+  bool isless(short float x, short float y);
   bool isless(float x, float y);
   bool isless(double x, double y);
   bool isless(long double x, long double y);
 
+  bool islessequal(short float x, short float y);
   bool islessequal(float x, float y);
   bool islessequal(double x, double y);
   bool islessequal(long double x, long double y);
 
+  bool islessgreater(short float x, short float y);
   bool islessgreater(float x, float y);
   bool islessgreater(double x, double y);
   bool islessgreater(long double x, long double y);
 
+  bool isunordered(short float x, short float y);
   bool isunordered(float x, float y);
   bool isunordered(double x, double y);
   bool isunordered(long double x, long double y);
@@ -10308,108 +10435,129 @@ namespace std {
 
   // \ref{sf.cmath.assoc_laguerre}, associated Laguerre polynomials
   double       assoc_laguerre(unsigned n, unsigned m, double x);
+  short float  assoc_laguerresf(unsigned n, unsigned m, short float x);
   float        assoc_laguerref(unsigned n, unsigned m, float x);
   long double  assoc_laguerrel(unsigned n, unsigned m, long double x);
 
   // \ref{sf.cmath.assoc_legendre}, associated Legendre functions
   double       assoc_legendre(unsigned l, unsigned m, double x);
+  short float  assoc_legendresf(unsigned n, unsigned m, short float x);
   float        assoc_legendref(unsigned l, unsigned m, float x);
   long double  assoc_legendrel(unsigned l, unsigned m, long double x);
 
   // \ref{sf.cmath.beta}, beta function
   double       beta(double x, double y);
+  short float  betasf(short float x, short float y);
   float        betaf(float x, float y);
   long double  betal(long double x, long double y);
 
   // \ref{sf.cmath.comp_ellint_1}, complete elliptic integral of the first kind
   double       comp_ellint_1(double k);
+  short float  comp_ellint_1sf(short float k);
   float        comp_ellint_1f(float k);
   long double  comp_ellint_1l(long double k);
 
   // \ref{sf.cmath.comp_ellint_2}, complete elliptic integral of the second kind
   double       comp_ellint_2(double k);
+  short float  comp_ellint_2sf(short float k);
   float        comp_ellint_2f(float k);
   long double  comp_ellint_2l(long double k);
 
   // \ref{sf.cmath.comp_ellint_3}, complete elliptic integral of the third kind
   double       comp_ellint_3(double k, double nu);
+  short float  comp_ellint_3sf(short float k, short float nu);
   float        comp_ellint_3f(float k, float nu);
   long double  comp_ellint_3l(long double k, long double nu);
 
   // \ref{sf.cmath.cyl_bessel_i}, regular modified cylindrical Bessel functions
   double       cyl_bessel_i(double nu, double x);
+  short float  cyl_bessel_isf(short float nu, short float x);
   float        cyl_bessel_if(float nu, float x);
   long double  cyl_bessel_il(long double nu, long double x);
 
   // \ref{sf.cmath.cyl_bessel_j}, cylindrical Bessel functions of the first kind
   double       cyl_bessel_j(double nu, double x);
+  short float  cyl_bessel_jsf(short float nu, short float x);
   float        cyl_bessel_jf(float nu, float x);
   long double  cyl_bessel_jl(long double nu, long double x);
 
   // \ref{sf.cmath.cyl_bessel_k}, irregular modified cylindrical Bessel functions
   double       cyl_bessel_k(double nu, double x);
+  short float  cyl_bessel_ksf(short float nu, short float x);
   float        cyl_bessel_kf(float nu, float x);
   long double  cyl_bessel_kl(long double nu, long double x);
 
   // \ref{sf.cmath.cyl_neumann}, cylindrical Neumann functions;
   // cylindrical Bessel functions of the second kind
   double       cyl_neumann(double nu, double x);
+  short float  cyl_neumannsf(short float nu, short float x);
   float        cyl_neumannf(float nu, float x);
   long double  cyl_neumannl(long double nu, long double x);
 
   // \ref{sf.cmath.ellint_1}, incomplete elliptic integral of the first kind
   double       ellint_1(double k, double phi);
+  short float  ellint_1sf(short float k, short float phi);
   float        ellint_1f(float k, float phi);
   long double  ellint_1l(long double k, long double phi);
 
   // \ref{sf.cmath.ellint_2}, incomplete elliptic integral of the second kind
   double       ellint_2(double k, double phi);
+  short float  ellint_2sf(short float k, short float phi);
   float        ellint_2f(float k, float phi);
   long double  ellint_2l(long double k, long double phi);
 
   // \ref{sf.cmath.ellint_3}, incomplete elliptic integral of the third kind
   double       ellint_3(double k, double nu, double phi);
+  short float  ellint_3sf(short float k, short float nu, short float phi);
   float        ellint_3f(float k, float nu, float phi);
   long double  ellint_3l(long double k, long double nu, long double phi);
 
   // \ref{sf.cmath.expint}, exponential integral
   double       expint(double x);
+  short float  expintsf(short float x);
   float        expintf(float x);
   long double  expintl(long double x);
 
   // \ref{sf.cmath.hermite}, Hermite polynomials
   double       hermite(unsigned n, double x);
+  short float  hermitesf(unsigned n, short float x);
   float        hermitef(unsigned n, float x);
   long double  hermitel(unsigned n, long double x);
 
   // \ref{sf.cmath.laguerre}, Laguerre polynomials
   double       laguerre(unsigned n, double x);
+  short float  laguerresf(unsigned n, short float x);
   float        laguerref(unsigned n, float x);
   long double  laguerrel(unsigned n, long double x);
 
   // \ref{sf.cmath.legendre}, Legendre polynomials
   double       legendre(unsigned l, double x);
+  short float  legendresf(unsigned l, short float x);
   float        legendref(unsigned l, float x);
   long double  legendrel(unsigned l, long double x);
 
   // \ref{sf.cmath.riemann_zeta}, Riemann zeta function
   double       riemann_zeta(double x);
+  short float  riemann_zetasf(short float x);
   float        riemann_zetaf(float x);
   long double  riemann_zetal(long double x);
 
   // \ref{sf.cmath.sph_bessel}, spherical Bessel functions of the first kind
   double       sph_bessel(unsigned n, double x);
+  short float  sph_besselsf(unsigned n, short float x);
   float        sph_besself(unsigned n, float x);
   long double  sph_bessell(unsigned n, long double x);
 
   // \ref{sf.cmath.sph_legendre}, spherical associated Legendre functions
   double       sph_legendre(unsigned l, unsigned m, double theta);
+  short float  sph_legendresf(unsigned l, unsigned m, short float theta);
   float        sph_legendref(unsigned l, unsigned m, float theta);
   long double  sph_legendrel(unsigned l, unsigned m, long double theta);
 
   // \ref{sf.cmath.sph_neumann}, spherical Neumann functions;
   // spherical Bessel functions of the second kind
   double       sph_neumann(unsigned n, double x);
+  short float  sph_neumannsf(unsigned n, short float x);
   float        sph_neumannf(unsigned n, float x);
   long double  sph_neumannl(unsigned n, long double x);
 }
@@ -10471,6 +10619,7 @@ declare the functions described in this subclause.
 int abs(int j);
 long int abs(long int j);
 long long int abs(long long int j);
+short float abs(short float j);
 float abs(float j);
 double abs(double j);
 long double abs(long double j);
@@ -10482,7 +10631,7 @@ long double abs(long double j);
 The \tcode{abs}
 functions have the semantics specified in the C standard library
 for the functions \tcode{abs}, \tcode{labs}, \tcode{llabs},
-\tcode{fabsf}, \tcode{fabs}, and \tcode{fabsl}.
+\tcode{fabsf}, \tcode{fabssf}, \tcode{fabs}, and \tcode{fabsl}.
 
 \pnum
 \remarks
@@ -10501,6 +10650,7 @@ Arguments that can be promoted to \tcode{int} are permitted for compatibility wi
 
 \indexlibrary{\idxcode{hypot}!3-argument form}%
 \begin{itemdecl}
+short float hypot(short float x, short float y, short float z);
 float hypot(float x, float y, float z);
 double hypot(double x, double y, double z);
 long double hypot(long double x, long double y, long double z);
@@ -10573,12 +10723,14 @@ and for positive infinity.
 
 \rSec3[sf.cmath.assoc_laguerre]{Associated Laguerre polynomials}%
 \indexlibrary{\idxcode{assoc_laguerre}}%
+\indexlibrary{\idxcode{assoc_laguerresf}}%
 \indexlibrary{\idxcode{assoc_laguerref}}%
 \indexlibrary{\idxcode{assoc_laguerrel}}%
 \indextext{Laguerre polynomials!$\mathsf{L}_n^m$}%
 \indextext{L nm@$\mathsf{L}_n^m$ (associated Laguerre polynomials)}%
 \begin{itemdecl}
 double       assoc_laguerre(unsigned n, unsigned m, double x);
+short float  assoc_laguerresf(unsigned n, unsigned m, short float x);
 float        assoc_laguerref(unsigned n, unsigned m, float x);
 long double  assoc_laguerrel(unsigned n, unsigned m, long double x);
 \end{itemdecl}
@@ -10610,12 +10762,14 @@ if \tcode{n >= 128} or if \tcode{m >= 128}.
 
 \rSec3[sf.cmath.assoc_legendre]{Associated Legendre functions}%
 \indexlibrary{\idxcode{assoc_legendre}}%
+\indexlibrary{\idxcode{assoc_legendresf}}%
 \indexlibrary{\idxcode{assoc_legendref}}%
 \indexlibrary{\idxcode{assoc_legendrel}}%
 \indextext{Legendre polynomials!$\mathsf{P}_\ell^m$}%
 \indextext{P lm@$\mathsf{P}_\ell^m$ (associated Legendre polynomials)}%
 \begin{itemdecl}
 double       assoc_legendre(unsigned l, unsigned m, double x);
+short float  assoc_legendresf(unsigned l, unsigned m, short float x);
 float        assoc_legendref(unsigned l, unsigned m, float x);
 long double  assoc_legendrel(unsigned l, unsigned m, long double x);
 \end{itemdecl}
@@ -10650,12 +10804,14 @@ if \tcode{l >= 128}.
 
 \rSec3[sf.cmath.beta]{Beta function}%
 \indexlibrary{\idxcode{beta}}%
+\indexlibrary{\idxcode{betasf}}%
 \indexlibrary{\idxcode{betaf}}%
 \indexlibrary{\idxcode{betal}}%
 \indextext{Eulerian integral of the first kind|see{\tcode{beta}}}%
 \indextext{beta functions $\mathsf{B}$}%
 \begin{itemdecl}
 double       beta(double x, double y);
+short float  betasf(short float x, short float y);
 float        betaf(float x, float y);
 long double  betal(long double x, long double y);
 \end{itemdecl}
@@ -10682,12 +10838,14 @@ $y$ is \tcode{y}.
 
 \rSec3[sf.cmath.comp_ellint_1]{Complete elliptic integral of the first kind}%
 \indexlibrary{\idxcode{comp_ellint_1}}%
+\indexlibrary{\idxcode{comp_ellint_1sf}}%
 \indexlibrary{\idxcode{comp_ellint_1f}}%
 \indexlibrary{\idxcode{comp_ellint_1l}}%
 \indextext{elliptic integrals!complete $\mathsf{K}$}%
 \indextext{K complete@$\mathsf{K}$ (complete elliptic integrals)}%
 \begin{itemdecl}
 double       comp_ellint_1(double k);
+short float  comp_ellint_1sf(short float k);
 float        comp_ellint_1f(float k);
 long double  comp_ellint_1l(long double k);
 \end{itemdecl}
@@ -10713,12 +10871,14 @@ $k$ is \tcode{k}.
 
 \rSec3[sf.cmath.comp_ellint_2]{Complete elliptic integral of the second kind}%
 \indexlibrary{\idxcode{comp_ellint_2}}%
+\indexlibrary{\idxcode{comp_ellint_2sf}}%
 \indexlibrary{\idxcode{comp_ellint_2f}}%
 \indexlibrary{\idxcode{comp_ellint_2l}}%
 \indextext{elliptic integrals!complete $\mathsf{E}$}%
 \indextext{E complete@$\mathsf{E}$ (complete elliptic integrals)}%
 \begin{itemdecl}
 double       comp_ellint_2(double k);
+short float  comp_ellint_2sf(short float k);
 float        comp_ellint_2f(float k);
 long double  comp_ellint_2l(long double k);
 \end{itemdecl}
@@ -10745,12 +10905,14 @@ $k$ is \tcode{k}.
 
 \rSec3[sf.cmath.comp_ellint_3]{Complete elliptic integral of the third kind}%
 \indexlibrary{\idxcode{comp_ellint_3}}%
+\indexlibrary{\idxcode{comp_ellint_3sf}}%
 \indexlibrary{\idxcode{comp_ellint_3f}}%
 \indexlibrary{\idxcode{comp_ellint_3l}}%
 \indextext{elliptic integrals!complete $\mathsf{\Pi}$}%
 \indextext{Pi complete@$\mathsf{\Pi}$ (complete elliptic integrals)}%
 \begin{itemdecl}
 double       comp_ellint_3(double k, double nu);
+short float  comp_ellint_3f(short float k, short float nu);
 float        comp_ellint_3f(float k, float nu);
 long double  comp_ellint_3l(long double k, long double nu);
 \end{itemdecl}
@@ -10777,12 +10939,14 @@ $\nu$ is \tcode{nu}.
 
 \rSec3[sf.cmath.cyl_bessel_i]{Regular modified cylindrical Bessel functions}%
 \indexlibrary{\idxcode{cyl_bessel_i}}%
+\indexlibrary{\idxcode{cyl_bessel_isf}}%
 \indexlibrary{\idxcode{cyl_bessel_if}}%
 \indexlibrary{\idxcode{cyl_bessel_il}}%
 \indextext{Bessel functions!$\mathsf{I}_\nu$}%
 \indextext{I nu@$\mathsf{I}_\nu$ (Bessell functions)}%
 \begin{itemdecl}
 double       cyl_bessel_i(double nu, double x);
+short float  cyl_bessel_if(short float nu, short float x);
 float        cyl_bessel_if(float nu, float x);
 long double  cyl_bessel_il(long double nu, long double x);
 \end{itemdecl}
@@ -10818,12 +10982,14 @@ if \tcode{nu >= 128}.
 
 \rSec3[sf.cmath.cyl_bessel_j]{Cylindrical Bessel functions of the first kind}%
 \indexlibrary{\idxcode{cyl_bessel_j}}%
+\indexlibrary{\idxcode{cyl_bessel_jsf}}%
 \indexlibrary{\idxcode{cyl_bessel_jf}}%
 \indexlibrary{\idxcode{cyl_bessel_jl}}%
 \indextext{Bessel functions!$\mathsf{J}_\nu$}%
 \indextext{J nu@$\mathsf{J}_\nu$ (Bessell functions)}%
 \begin{itemdecl}
 double       cyl_bessel_j(double nu, double x);
+short float  cyl_bessel_jf(short float nu, short float x);
 float        cyl_bessel_jf(float nu, float x);
 long double  cyl_bessel_jl(long double nu, long double x);
 \end{itemdecl}
@@ -10855,12 +11021,14 @@ if \tcode{nu >= 128}.
 
 \rSec3[sf.cmath.cyl_bessel_k]{Irregular modified cylindrical Bessel functions}%
 \indexlibrary{\idxcode{cyl_bessel_k}}%
+\indexlibrary{\idxcode{cyl_bessel_ksf}}%
 \indexlibrary{\idxcode{cyl_bessel_kf}}%
 \indexlibrary{\idxcode{cyl_bessel_kl}}%
 \indextext{Bessel functions!$\mathsf{K}_\nu$}%
 \indextext{K nu@$\mathsf{K}_\nu$ (Bessell functions)}%
 \begin{itemdecl}
 double       cyl_bessel_k(double nu, double x);
+short float  cyl_bessel_kf(short float nu, short float x);
 float        cyl_bessel_kf(float nu, float x);
 long double  cyl_bessel_kl(long double nu, long double x);
 \end{itemdecl}
@@ -10911,6 +11079,7 @@ if \tcode{nu >= 128}.
 
 \rSec3[sf.cmath.cyl_neumann]{Cylindrical Neumann functions}%
 \indexlibrary{\idxcode{cyl_neumann}}%
+\indexlibrary{\idxcode{cyl_neumannsf}}%
 \indexlibrary{\idxcode{cyl_neumannf}}%
 \indexlibrary{\idxcode{cyl_neumannl}}%
 \indextext{Bessel functions!$\mathsf{N}_\nu$}%
@@ -10918,6 +11087,7 @@ if \tcode{nu >= 128}.
 \indextext{N nu@$\mathsf{N}_\nu$ (Neumann functions)}%
 \begin{itemdecl}
 double       cyl_neumann(double nu, double x);
+short float  cyl_neumannf(short float nu, short float x);
 float        cyl_neumannf(float nu, float x);
 long double  cyl_neumannl(long double nu, long double x);
 \end{itemdecl}
@@ -10962,12 +11132,14 @@ if \tcode{nu >= 128}.
 
 \rSec3[sf.cmath.ellint_1]{Incomplete elliptic integral of the first kind}%
 \indexlibrary{\idxcode{ellint_1}}%
+\indexlibrary{\idxcode{ellint_1sf}}%
 \indexlibrary{\idxcode{ellint_1f}}%
 \indexlibrary{\idxcode{ellint_1l}}%
 \indextext{elliptic integrals!incomplete $\mathsf{F}$}%
 \indextext{F incomplete@$\mathsf{F}$ (incomplete elliptic integrals)}%
 \begin{itemdecl}
 double       ellint_1(double k, double phi);
+short float  ellint_1sf(short float k, short float phi);
 float        ellint_1f(float k, float phi);
 long double  ellint_1l(long double k, long double phi);
 \end{itemdecl}
@@ -10994,12 +11166,14 @@ $\phi$ is \tcode{phi}.
 
 \rSec3[sf.cmath.ellint_2]{Incomplete elliptic integral of the second kind}%
 \indexlibrary{\idxcode{ellint_2}}%
+\indexlibrary{\idxcode{ellint_2sf}}%
 \indexlibrary{\idxcode{ellint_2f}}%
 \indexlibrary{\idxcode{ellint_2l}}%
 \indextext{elliptic integrals!incomplete $\mathsf{E}$}%
 \indextext{E incomplete@$\mathsf{E}$ (incomplete elliptic integrals)}%
 \begin{itemdecl}
 double       ellint_2(double k, double phi);
+short float  ellint_2f(short float k, short float phi);
 float        ellint_2f(float k, float phi);
 long double  ellint_2l(long double k, long double phi);
 \end{itemdecl}
@@ -11025,12 +11199,14 @@ $\phi$ is \tcode{phi}.
 
 \rSec3[sf.cmath.ellint_3]{Incomplete elliptic integral of the third kind}%
 \indexlibrary{\idxcode{ellint_3}}%
+\indexlibrary{\idxcode{ellint_3sf}}%
 \indexlibrary{\idxcode{ellint_3f}}%
 \indexlibrary{\idxcode{ellint_3l}}%
 \indextext{elliptic integrals!incomplete $\mathsf{\Pi}$}%
 \indextext{Pi incomplete@$\mathsf{\Pi}$ (incomplete elliptic integrals)}%
 \begin{itemdecl}
 double       ellint_3(double k, double nu, double phi);
+short float  ellint_3f(short float k, short float nu, short float phi);
 float        ellint_3f(float k, float nu, float phi);
 long double  ellint_3l(long double k, long double nu, long double phi);
 \end{itemdecl}
@@ -11058,12 +11234,14 @@ $\phi$ is \tcode{phi}.
 
 \rSec3[sf.cmath.expint]{Exponential integral}%
 \indexlibrary{\idxcode{expint}}%
+\indexlibrary{\idxcode{expintsf}}%
 \indexlibrary{\idxcode{expintf}}%
 \indexlibrary{\idxcode{expintl}}%
 \indextext{exponential integrals $\mathsf{Ei}$}%
 \indextext{Ei@$\mathsf{Ei}$ (exponential integrals)}%
 \begin{itemdecl}
 double       expint(double x);
+short float  expintf(short float x);
 float        expintf(float x);
 long double  expintl(long double x);
 \end{itemdecl}
@@ -11089,12 +11267,14 @@ $x$ is \tcode{x}.
 
 \rSec3[sf.cmath.hermite]{Hermite polynomials}%
 \indexlibrary{\idxcode{hermite}}%
+\indexlibrary{\idxcode{hermitesf}}%
 \indexlibrary{\idxcode{hermitef}}%
 \indexlibrary{\idxcode{hermitel}}%
 \indextext{Hermite polynomials $\mathsf{H}_n$}%
 \indextext{H n@$\mathsf{H}_n$ (Hermite polynomials)}%
 \begin{itemdecl}
 double       hermite(unsigned n, double x);
+short float  hermitesf(unsigned n, short float x);
 float        hermitef(unsigned n, float x);
 long double  hermitel(unsigned n, long double x);
 \end{itemdecl}
@@ -11124,12 +11304,14 @@ if \tcode{n >= 128}.
 
 \rSec3[sf.cmath.laguerre]{Laguerre polynomials}%
 \indexlibrary{\idxcode{laguerre}}%
+\indexlibrary{\idxcode{laguerresf}}%
 \indexlibrary{\idxcode{laguerref}}%
 \indexlibrary{\idxcode{laguerrel}}%
 \indextext{Laguerre polynomials!$\mathsf{L}_n$}%
 \indextext{L n@$\mathsf{L}_n$ (Laguerre polynomials)}%
 \begin{itemdecl}
 double       laguerre(unsigned n, double x);
+short float  laguerref(unsigned n, short float x);
 float        laguerref(unsigned n, float x);
 long double  laguerrel(unsigned n, long double x);
 \end{itemdecl}
@@ -11160,12 +11342,14 @@ if \tcode{n >= 128}.
 
 \rSec3[sf.cmath.legendre]{Legendre polynomials}%
 \indexlibrary{\idxcode{legendre}}%
+\indexlibrary{\idxcode{legendresf}}%
 \indexlibrary{\idxcode{legendref}}%
 \indexlibrary{\idxcode{legendrel}}%
 \indextext{Legendre polynomials!$\mathsf{P}_\ell$}%
 \indextext{P l@$\mathsf{P}_\ell$ (Legendre polynomials)}%
 \begin{itemdecl}
 double       legendre(unsigned l, double x);
+short float  legendresf(unsigned l, short float x);
 float        legendref(unsigned l, float x);
 long double  legendrel(unsigned l, long double x);
 \end{itemdecl}
@@ -11198,11 +11382,13 @@ if \tcode{l >= 128}.
 
 \rSec3[sf.cmath.riemann_zeta]{Riemann zeta function}%
 \indexlibrary{\idxcode{riemann_zeta}}%
+\indexlibrary{\idxcode{riemann_zetasf}}%
 \indexlibrary{\idxcode{riemann_zetaf}}%
 \indexlibrary{\idxcode{riemann_zetal}}%
 \indextext{zeta functions $\zeta$}%
 \begin{itemdecl}
 double       riemann_zeta(double x);
+short float  riemann_zetasf(short float x);
 float        riemann_zetaf(float x);
 long double  riemann_zetal(long double x);
 \end{itemdecl}
@@ -11244,12 +11430,14 @@ $x$ is \tcode{x}.
 
 \rSec3[sf.cmath.sph_bessel]{Spherical Bessel functions of the first kind}%
 \indexlibrary{\idxcode{sph_bessel}}%
+\indexlibrary{\idxcode{sph_besselsf}}%
 \indexlibrary{\idxcode{sph_besself}}%
 \indexlibrary{\idxcode{sph_bessell}}%
 \indextext{Bessel functions!$\mathsf{j}_n$}%
 \indextext{j n@$\mathsf{j}_n$ (spherical Bessel functions)}%
 \begin{itemdecl}
 double       sph_bessel(unsigned n, double x);
+short float  sph_besselsf(unsigned n, short float x);
 float        sph_besself(unsigned n, float x);
 long double  sph_bessell(unsigned n, long double x);
 \end{itemdecl}
@@ -11282,6 +11470,7 @@ if \tcode{n >= 128}.
 
 \rSec3[sf.cmath.sph_legendre]{Spherical associated Legendre functions}%
 \indexlibrary{\idxcode{sph_legendre}}%
+\indexlibrary{\idxcode{sph_legendresf}}%
 \indexlibrary{\idxcode{sph_legendref}}%
 \indexlibrary{\idxcode{sph_legendrel}}%
 \indextext{spherical harmonics $\mathsf{Y}_\ell^m$}%
@@ -11289,6 +11478,7 @@ if \tcode{n >= 128}.
 \indextext{Y lm@$\mathsf{Y}_\ell^m$ (spherical associated Legendre functions)}%
 \begin{itemdecl}
 double       sph_legendre(unsigned l, unsigned m, double theta);
+short float  sph_legendresf(unsigned l, unsigned m, short float theta);
 float        sph_legendref(unsigned l, unsigned m, float theta);
 long double  sph_legendrel(unsigned l, unsigned m, long double theta);
 \end{itemdecl}
@@ -11330,6 +11520,7 @@ if \tcode{l >= 128}.
 
 \rSec3[sf.cmath.sph_neumann]{Spherical Neumann functions}%
 \indexlibrary{\idxcode{sph_neumann}}%
+\indexlibrary{\idxcode{sph_neumannsf}}%
 \indexlibrary{\idxcode{sph_neumannf}}%
 \indexlibrary{\idxcode{sph_neumannl}}%
 \indextext{Bessel functions!$\mathsf{n}_n$}%
@@ -11337,6 +11528,7 @@ if \tcode{l >= 128}.
 \indextext{n n spherical@$\mathsf{n}_n$ (spherical Neumann functions)}%
 \begin{itemdecl}
 double       sph_neumann(unsigned n, double x);
+short float  sph_neumannsf(unsigned n, short float x);
 float        sph_neumannf(unsigned n, float x);
 long double  sph_neumannl(unsigned n, long double x);
 \end{itemdecl}

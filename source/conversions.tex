@@ -398,9 +398,11 @@ These conversions are called \defnx{integral promotions}{integral promotion}.
 \indextext{promotion!floating-point}%
 A prvalue of type \tcode{float} can be converted to a prvalue of type
 \tcode{double}. The value is unchanged.
+A prvalue of type \tcode{short float} can be converted to a prvalue of type
+\tcode{float} and type \tcode{double}. The value is unchanged.
 
 \pnum
-This conversion is called \defn{floating-point promotion}.
+These conversions are called \defn{floating-point promotions}.
 
 \rSec1[conv.integral]{Integral conversions}
 

@@ -140,6 +140,7 @@ and as noted in
 \indexlibrary{\idxcode{srand}}%
 \indexlibrary{\idxcode{strtod}}%
 \indexlibrary{\idxcode{strtof}}%
+\indexlibrary{\idxcode{strtosf}}%
 \indexlibrary{\idxcode{strtol}}%
 \indexlibrary{\idxcode{strtold}}%
 \indexlibrary{\idxcode{strtoll}}%
@@ -195,6 +196,7 @@ namespace std {
   long long int atoll(const char* nptr);
   double strtod(const char* nptr, char** endptr);
   float strtof(const char* nptr, char** endptr);
+  short float strtosf(const char* nptr, char** endptr);
   long double strtold(const char* nptr, char** endptr);
   long int strtol(const char* nptr, char** endptr, int base);
   long long int strtoll(const char* nptr, char** endptr, int base);
@@ -225,6 +227,7 @@ namespace std {
   long int abs(long int j);
   long long int abs(long long int j);
   float abs(float j);
+  short float abs(short float j);
   double abs(double j);
   long double abs(long double j);
 
@@ -548,6 +551,7 @@ namespace std {
   template<> class numeric_limits<unsigned long>;
   template<> class numeric_limits<unsigned long long>;
 
+  template<> class numeric_limits<short float>;
   template<> class numeric_limits<float>;
   template<> class numeric_limits<double>;
   template<> class numeric_limits<long double>;
