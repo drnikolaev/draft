@@ -440,7 +440,8 @@ or
 \tcode{OutputIterator}
 indicates the set of
 all possible specializations on parameters that satisfy the
-requirements of an Input Iterator or an Output Iterator, respectively\iref{iterator.requirements}.
+\oldconcept{InputIterator} requirements or \oldconcept{OutputIterator}
+requirements, respectively\iref{iterator.requirements}.
 A template parameter with name
 \tcode{C}
 represents the set
@@ -1908,7 +1909,7 @@ converts between the native character sets for narrow and wide characters.
 Specializations on
 \tcode{mbstate_t}
 perform conversion between encodings known to the library implementer.
-Other encodings can be converted by specializing on a user-defined
+Other encodings can be converted by specializing on a program-defined
 \tcode{stateT}
 type.
 Objects of type

@@ -276,9 +276,9 @@ using state_type = STATE_T;
 \requires
 \tcode{state_type}
 shall satisfy the
-\tcode{CopyAssignable} (\tref{copyassignable}),
-\tcode{CopyConstructible} (\tref{copyconstructible}), and
-\tcode{DefaultConstructible} (\tref{defaultconstructible}) requirements.
+\oldconcept{CopyAssignable} (\tref{copyassignable}),
+\oldconcept{CopyConstructible} (\tref{copyconstructible}), and
+\oldconcept{DefaultConstructible} (\tref{defaultconstructible}) requirements.
 \end{itemdescr}
 
 \rSec2[char.traits.specializations]{\tcode{char_traits} specializations}
@@ -1384,6 +1384,15 @@ whose first element is designated by \tcode{s}.
 of the array whose first element is pointed at by \tcode{s},
 \tcode{size()} is equal to \tcode{traits::length(s)}, and
 \tcode{capacity()} is a value at least as large as \tcode{size()}.
+
+\pnum
+\remarks
+Shall not participate in overload resolution
+if \tcode{Allocator} is a type
+that does not qualify as an allocator\iref{container.requirements.general}.
+\begin{note}
+This affects class template argument deduction.
+\end{note}
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_string}!constructor}%
@@ -1408,6 +1417,15 @@ object \tcode{c} for all \tcode{n} elements.
 of \tcode{n} elements, each storing the initial value \tcode{c},
 \tcode{size()} is equal to \tcode{n}, and
 \tcode{capacity()} is a value at least as large as \tcode{size()}.
+
+\pnum
+\remarks
+Shall not participate in overload resolution
+if \tcode{Allocator} is a type
+that does not qualify as an allocator\iref{container.requirements.general}.
+\begin{note}
+This affects class template argument deduction.
+\end{note}
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_string}!constructor}%
@@ -4787,9 +4805,6 @@ The library provides implicit conversions from \tcode{const charT*} and \tcode{s
 User-defined types should define their own implicit conversions to \tcode{std::basic_string_view} in order to interoperate with these functions.
 \end{note}
 
-\pnum
-The complexity of \tcode{basic_string_view} member functions is \bigoh{1} unless otherwise specified.
-
 \rSec2[string.view.synop]{Header \tcode{<string_view>} synopsis}
 
 \indexhdr{string_view}%
@@ -4987,6 +5002,10 @@ and the type \tcode{traits::char_type} shall name the same type as \tcode{charT}
 \pnum
 The type \tcode{iterator} satisfies
 the constexpr iterator requirements\iref{iterator.requirements.general}.
+
+\pnum
+The complexity of \tcode{basic_string_view} member functions is \bigoh{1}
+unless otherwise specified.
 
 \rSec3[string.view.cons]{Construction and assignment}
 

@@ -1105,7 +1105,9 @@ namespace std {
   class ios_base::Init {
   public:
     Init();
+    Init(const Init&) = default;
     ~Init();
+    Init& operator=(const Init&) = default;
   private:
     static int init_cnt; // \expos
   };
@@ -1437,6 +1439,10 @@ long& iword(int idx);
 
 \begin{itemdescr}
 \pnum
+\requires
+\tcode{idx} is a value obtained by a call to \tcode{xalloc}.
+
+\pnum
 \effects
 If \tcode{iarray} is a null pointer, allocates an array of
 \tcode{long}
@@ -1482,6 +1488,10 @@ void*& pword(int idx);
 \end{itemdecl}
 
 \begin{itemdescr}
+\pnum
+\requires
+\tcode{idx} is a value obtained by a call to \tcode{xalloc}.
+
 \pnum
 \effects
 If \tcode{parray} is a null pointer, allocates an array of
@@ -1647,15 +1657,37 @@ Current value of \tcode{st}.
 \pnum
 \indexlibrary{\idxcode{fpos}}%
 \indexlibrary{\idxcode{streamoff}}%
-Operations specified in \tref{iostreams.position.requirements} are permitted.
+An \tcode{fpos} type specifies file position information.
+It holds a state object
+whose type is equal to the template parameter \tcode{stateT}.
+Type \tcode{stateT} shall meet
+the \oldconcept{DefaultConstructible} (\tref{defaultconstructible}),
+\oldconcept{CopyConstructible} (\tref{copyconstructible}),
+\oldconcept{CopyAssignable} (\tref{copyassignable}), and
+\oldconcept{Destructible} (\tref{destructible}) requirements.
+If \tcode{is_trivially_copy_constructible_v<stateT>} is \tcode{true},
+then \tcode{fpos<stateT>} has a trivial copy constructor.
+If \tcode{is_trivially_copy_assignable<stateT>} is \tcode{true},
+then \tcode{fpos<stateT>} has a trivial copy assignment operator.
+If \tcode{is_trivially_destructible_v<stateT>} is \tcode{true},
+then \tcode{fpos<stateT>} has a trivial destructor.
+All specializations of \tcode{fpos} satisfy
+the \oldconcept{DefaultConstructible},
+\oldconcept{CopyConstructible},
+\oldconcept{CopyAssignable},
+\oldconcept{Destructible},
+and \oldconcept{EqualityComparable} (\tref{equalitycomparable}) requirements.
+In addition, the expressions shown in \tref{iostreams.position.requirements}
+are valid and have the indicated semantics.
 In that table,
 \begin{itemize}
 \item \tcode{P} refers to an instance of \tcode{fpos},
-\item \tcode{p} and \tcode{q} refer to values of type \tcode{P},
-\item \tcode{O} refers to type \tcode{streamoff},
-\item \tcode{o} refers to a value of type \tcode{streamoff},
-\item \tcode{sz} refers to a value of type \tcode{streamsize} and
-\item \tcode{i} refers to a value of type \tcode{int}.
+\item \tcode{p} and \tcode{q} refer to values
+of type \tcode{P} or \tcode{const P},
+\item \tcode{pl} and \tcode{ql} refer to modifiable lvalues of type \tcode{P},
+\item \tcode{O} refers to type \tcode{streamoff}, and
+\item \tcode{o} refers to a value
+of type \tcode{streamoff} or \tcode{const streamoff}.
 \end{itemize}
 
 \begin{libreqtab4c}
@@ -1670,64 +1702,58 @@ In that table,
 \lhdr{Expression}   & \chdr{Return type}  & \chdr{Operational}  & \rhdr{Assertion/note}   \\
             &           & \chdr{semantics}  & \rhdr{pre-/post-condition} \\ \capsep
 \endhead
-\tcode{P(i)}      &
-            &
-            &
- \tcode{p == P(i)}\br
- note: a destructor is assumed. \\ \rowsep
-\tcode{P p(i);}\br
-\tcode{P p = i;}    &
-            &
-            &
- \postconditions \tcode{p == P(i)}. \\ \rowsep
 \tcode{P(o)}      &
- \tcode{fpos}     &
- converts from \tcode{offset} & \\ \rowsep
+ \tcode{P}     &
+ converts from \tcode{offset} &
+ \effects Value-initializes the state object. \\ \rowsep
+\tcode{P p(o);}\br
+\tcode{P p = o;} &
+ &
+ &
+ \effects Value-initializes the state object. \br
+ \postconditions \tcode{p == P(o)} \\ \rowsep
+\tcode{P()} &
+ \tcode{P} &
+ \tcode{P(0)} &
+  \\ \rowsep
+\tcode{P p;} &
+ &
+ \tcode{P p(0);} &
+  \\ \rowsep
 \tcode{O(p)}      &
  \tcode{streamoff}      &
  converts to \tcode{offset} &
  \tcode{P(O(p)) == p} \\ \rowsep
-\tcode{p == q}      &
- convertible to \tcode{bool}  &
-            &
- \tcode{==} is an equivalence relation  \\ \rowsep
 \tcode{p != q}      &
  convertible to \tcode{bool}  &
  \tcode{!(p == q)}    & \\ \rowsep
-\tcode{q = p + o}\br
-\tcode{p += o}      &
- \tcode{fpos}     &
+\tcode{p + o} &
+ \tcode{P}     &
  \tcode{+} offset   &
- \tcode{q - o == p}   \\ \rowsep
-\tcode{q = p - o}\br
-\tcode{p -= o}      &
- \tcode{fpos}     &
+ \remarks With \tcode{ql = p + o;}, then: \tcode{ql - o == p}  \\ \rowsep
+\tcode{pl += o} &
+ \tcode{P\&} &
+ \tcode{+=} offset &
+ \remarks With \tcode{ql = pl;} before the \tcode{+=}, then:
+   \tcode{pl - o == ql} \\ \rowsep
+\tcode{p - o} &
+ \tcode{P}     &
  \tcode{-} offset   &
- \tcode{q + o == p}   \\ \rowsep
-\tcode{o = p - q}   &
+ \remarks With \tcode{ql = p - o;}, then: \tcode{ql + o == p}  \\ \rowsep
+\tcode{pl -= o} &
+ \tcode{P\&} &
+ \tcode{-=} offset &
+ \remarks With \tcode{ql = pl;} before the \tcode{-=}, then:
+    \tcode{pl + o == ql} \\ \rowsep
+\tcode{o + p} &
+ convertible to \tcode{P} &
+ \tcode{p + o} &
+ \tcode{P(o + p) == p + o} \\ \rowsep
+\tcode{p - q}   &
  \tcode{streamoff}      &
  distance       &
- \tcode{q + o == p}   \\ \rowsep
-\tcode{streamsize(o)}\br
-\tcode{O(sz)}     &
- \tcode{streamsize}\br
- \tcode{streamoff}      &
- converts\br
- converts       &
- \tcode{streamsize(O(sz)) == sz}\br
- \tcode{streamsize(O(sz)) == sz}  \\
+ \tcode{p == q + (p - q)}   \\ \rowsep
 \end{libreqtab4c}
-
-\pnum
-\begin{note}
-Every implementation is required to supply overloaded operators on
-\tcode{fpos}
-objects to satisfy the requirements of~\ref{fpos.operations}.
-It is unspecified whether these operators are members of
-\tcode{fpos},
-global operators,
-or provided in some other way.
-\end{note}
 
 \pnum
 Stream operations that return a value of type
@@ -7351,8 +7377,8 @@ namespace std {
     using allocator_type = Allocator;
 
     // \ref{stringbuf.cons}, constructors
-    explicit basic_stringbuf(
-      ios_base::openmode which = ios_base::in | ios_base::out);
+    basic_stringbuf() : basic_stringbuf(ios_base::in | ios_base::out) {}
+    explicit basic_stringbuf(ios_base::openmode which);
     explicit basic_stringbuf(
       const basic_string<charT, traits, Allocator>& str,
       ios_base::openmode which = ios_base::in | ios_base::out);
@@ -7419,8 +7445,7 @@ set if the output sequence can be written.
 
 \indexlibrary{\idxcode{basic_stringbuf}!constructor}%
 \begin{itemdecl}
-explicit basic_stringbuf(
-  ios_base::openmode which = ios_base::in | ios_base::out);
+explicit basic_stringbuf(ios_base::openmode which);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -7871,8 +7896,8 @@ namespace std {
     using allocator_type = Allocator;
 
     // \ref{istringstream.cons}, constructors
-    explicit basic_istringstream(
-      ios_base::openmode which = ios_base::in);
+    basic_istringstream() : basic_istringstream(ios_base::in) {}
+    explicit basic_istringstream(ios_base::openmode which);
     explicit basic_istringstream(
       const basic_string<charT, traits, Allocator>& str,
       ios_base::openmode which = ios_base::in);
@@ -7917,7 +7942,7 @@ For the sake of exposition, the maintained data is presented here as:
 
 \indexlibrary{\idxcode{basic_istringstream}!constructor}%
 \begin{itemdecl}
-explicit basic_istringstream(ios_base::openmode which = ios_base::in);
+explicit basic_istringstream(ios_base::openmode which);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -7928,7 +7953,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_istream<charT, traits>(\&sb)}\iref{istream}
 and initializing \tcode{sb} with
-\tcode{basic_string\-buf<charT, traits, Allocator>(which | ios_base::in))}\iref{stringbuf.cons}.
+\tcode{basic_string\-buf<charT, traits, Allocator>(which | ios_base::in)}\iref{stringbuf.cons}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_istringstream}!constructor}%
@@ -7946,7 +7971,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_istream<charT, traits>(\&sb)}\iref{istream}
 and initializing \tcode{sb} with
-\tcode{basic_string\-buf<charT, traits, Allocator>(str, which | ios_base::in))}\iref{stringbuf.cons}.
+\tcode{basic_string\-buf<charT, traits, Allocator>(str, which | ios_base::in)}\iref{stringbuf.cons}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_istringstream}!constructor}%
@@ -8058,8 +8083,8 @@ namespace std {
     using allocator_type = Allocator;
 
     // \ref{ostringstream.cons}, constructors
-    explicit basic_ostringstream(
-      ios_base::openmode which = ios_base::out);
+    basic_ostringstream() : basic_ostringstream(ios_base::out) {}
+    explicit basic_ostringstream(ios_base::openmode which);
     explicit basic_ostringstream(
       const basic_string<charT, traits, Allocator>& str,
       ios_base::openmode which = ios_base::out);
@@ -8104,8 +8129,7 @@ For the sake of exposition, the maintained data is presented here as:
 
 \indexlibrary{\idxcode{basic_ostringstream}!constructor}%
 \begin{itemdecl}
-explicit basic_ostringstream(
-  ios_base::openmode which = ios_base::out);
+explicit basic_ostringstream(ios_base::openmode which);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -8116,7 +8140,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_ostream<charT, traits>(\&sb)}\iref{ostream}
 and initializing \tcode{sb} with
-\tcode{basic_string\-buf<charT, traits, Allocator>(which | ios_base::out))}\iref{stringbuf.cons}.
+\tcode{basic_string\-buf<charT, traits, Allocator>(which | ios_base::out)}\iref{stringbuf.cons}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_ostringstream}!constructor}%
@@ -8134,7 +8158,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_ostream<charT, traits>(\&sb)}\iref{ostream}
 and initializing \tcode{sb} with
-\tcode{basic_string\-buf<charT, traits, Allocator>(str, which | ios_base::out))}\iref{stringbuf.cons}.
+\tcode{basic_string\-buf<charT, traits, Allocator>(str, which | ios_base::out)}\iref{stringbuf.cons}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_ostringstream}!constructor}%
@@ -8246,8 +8270,8 @@ namespace std {
     using allocator_type = Allocator;
 
     // \ref{stringstream.cons}, constructors
-    explicit basic_stringstream(
-      ios_base::openmode which = ios_base::out | ios_base::in);
+    basic_stringstream() : basic_stringstream(ios_base::out | ios_base::in) {}
+    explicit basic_stringstream(ios_base::openmode which);
     explicit basic_stringstream(
       const basic_string<charT, traits, Allocator>& str,
       ios_base::openmode which = ios_base::out | ios_base::in);
@@ -8293,8 +8317,7 @@ For the sake of exposition, the maintained data is presented here as
 
 \indexlibrary{\idxcode{basic_stringstream}!constructor}%
 \begin{itemdecl}
-explicit basic_stringstream(
-  ios_base::openmode which = ios_base::out | ios_base::in);
+explicit basic_stringstream(ios_base::openmode which);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -9338,7 +9361,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_istream<charT, traits>(\&sb)}\iref{istream.cons}
 and initializing \tcode{sb} with
-\tcode{basic_filebuf<charT, traits>())}\iref{filebuf.cons}.
+\tcode{basic_filebuf<charT, traits>()}\iref{filebuf.cons}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_ifstream}!constructor}%
@@ -9357,7 +9380,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_istream<charT, traits>(\&sb)}\iref{istream.cons}
 and initializing \tcode{sb} with
-\tcode{basic_filebuf<charT, traits>())}\iref{filebuf.cons},
+\tcode{basic_filebuf<charT, traits>()}\iref{filebuf.cons},
 then calls
 \tcode{rdbuf()->open(s, mode | ios_base::in)}.
 If that function returns a null pointer, calls
@@ -9586,7 +9609,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_ostream<charT, traits>(\&sb)}\iref{ostream.cons}
 and initializing \tcode{sb} with
-\tcode{basic_filebuf<charT, traits>())}\iref{filebuf.cons}.
+\tcode{basic_filebuf<charT, traits>()}\iref{filebuf.cons}.
 \end{itemdescr}
 
 \indexlibrary{\idxcode{basic_ofstream}!constructor}%
@@ -9605,7 +9628,7 @@ Constructs an object of class
 initializing the base class with
 \tcode{basic_ostream<charT, traits>(\&sb)}\iref{ostream.cons}
 and initializing \tcode{sb} with
-\tcode{basic_filebuf<charT, traits>())}\iref{filebuf.cons},
+\tcode{basic_filebuf<charT, traits>()}\iref{filebuf.cons},
 then calls
 \tcode{rdbuf()->open(s, mode | ios_base::out)}.
 If that function returns a null pointer, calls
@@ -10422,7 +10445,7 @@ namespace std {
 \end{codeblock}
 
 \pnum
-\tcode{Allocator} shall satisfy the \tcode{Allocator} requirements
+\tcode{Allocator} shall satisfy the \oldconcept{Allocator} requirements
 (\tref{utilities.allocator.requirements}).
 
 \pnum
@@ -10754,7 +10777,7 @@ unless \tcode{EcharT} is one of the encoded character types.
 
 \pnum
 Template parameters named \tcode{InputIterator} shall satisfy the
-input iterator requirements\iref{input.iterators} and shall
+\oldconcept{InputIterator} requirements\iref{input.iterators} and shall
 have a value type that is one of the encoded character types.
 
 \pnum
@@ -10766,7 +10789,7 @@ they are not included as permitted types. \end{note}
 
 \pnum
 Template parameters named \tcode{Allocator} shall satisfy the
-\tcode{Allocator} requirements (\tref{utilities.allocator.requirements}).
+\oldconcept{Allocator} requirements (\tref{utilities.allocator.requirements}).
 
 \rSec3[fs.req.namespace]{Namespaces and headers}
 
@@ -10991,7 +11014,7 @@ namespace std::filesystem {
 
 \pnum
 \tcode{\textit{trivial-clock}} is an \impldef{type of filesystem trivial clock} type
-that satisfies the \tcode{TrivialClock} requirements\iref{time.clock.req}
+that satisfies the \oldconcept{TrivialClock} requirements\iref{time.clock.req}
 and that is capable of representing and measuring file time values.
 Implementations should ensure that the resolution and range of
 \tcode{file_time_type} reflect the operating system dependent resolution and range
@@ -11554,7 +11577,7 @@ shall be one of:
 \item \tcode{basic_string_view<EcharT, traits>}. A function
   argument \tcode{const Source\&} \tcode{source} shall have an
   effective range \range{source.begin()}{source.end()}.
-\item A type meeting the input iterator requirements that iterates over a NTCTS.
+\item A type meeting the \oldconcept{InputIterator} requirements that iterates over a NTCTS.
   The value type shall be an encoded character type. A function argument
   \tcode{const Source\&} \tcode{source} shall have an effective range
   \range{source}{end} where \tcode{end} is the first
@@ -12739,6 +12762,43 @@ size_t hash_value (const path& p) noexcept;
   for two paths, \tcode{p1 == p2} then \tcode{hash_value(p1) == hash_value(p2)}.
 \end{itemdescr}
 
+\indexlibrarymember{operator==}{path}%
+\begin{itemdecl}
+bool operator==(const path& lhs, const path& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns \tcode{!(lhs < rhs) \&\& !(rhs < lhs)}.
+
+\indextext{path equality}
+\pnum
+\begin{note} Path equality and path equivalence have different semantics.
+\begin{itemize}
+\item Equality is determined by the \tcode{path} non-member \tcode{operator==},
+which considers the two paths' lexical representations only.
+\begin{example} \tcode{path("foo") == "bar"} is never \tcode{true}. \end{example}
+\item Equivalence is determined by the \tcode{equivalent()} non-member function, which
+determines if two paths resolve\iref{fs.class.path} to the same file system entity.
+\begin{example}
+\tcode{equivalent("foo", "bar")} will be \tcode{true} when both paths resolve to the same file.
+\end{example}
+\end{itemize}
+Programmers wishing to determine if two paths are ``the same'' must decide if
+  ``the same'' means ``the same representation'' or ``resolve to the same actual
+  file'', and choose the appropriate function accordingly. \end{note}
+\end{itemdescr}
+
+\indexlibrarymember{operator"!=}{path}%
+\begin{itemdecl}
+bool operator!=(const path& lhs, const path& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns \tcode{!(lhs == rhs)}.
+\end{itemdescr}
+
 \indexlibrarymember{operator<}{path}%
 \begin{itemdecl}
 bool operator< (const path& lhs, const path& rhs) noexcept;
@@ -12777,43 +12837,6 @@ bool operator>=(const path& lhs, const path& rhs) noexcept;
 \begin{itemdescr}
 \pnum
 \returns \tcode{!(lhs < rhs)}.
-\end{itemdescr}
-
-\indexlibrarymember{operator==}{path}%
-\begin{itemdecl}
-bool operator==(const path& lhs, const path& rhs) noexcept;
-\end{itemdecl}
-
-\begin{itemdescr}
-\pnum
-\returns \tcode{!(lhs < rhs) \&\& !(rhs < lhs)}.
-
-\indextext{path equality}
-\pnum
-\begin{note} Path equality and path equivalence have different semantics.
-\begin{itemize}
-\item Equality is determined by the \tcode{path} non-member \tcode{operator==},
-which considers the two paths' lexical representations only.
-\begin{example} \tcode{path("foo") == "bar"} is never \tcode{true}. \end{example}
-\item Equivalence is determined by the \tcode{equivalent()} non-member function, which
-determines if two paths resolve\iref{fs.class.path} to the same file system entity.
-\begin{example}
-\tcode{equivalent("foo", "bar")} will be \tcode{true} when both paths resolve to the same file.
-\end{example}
-\end{itemize}
-Programmers wishing to determine if two paths are ``the same'' must decide if
-  ``the same'' means ``the same representation'' or ``resolve to the same actual
-  file'', and choose the appropriate function accordingly. \end{note}
-\end{itemdescr}
-
-\indexlibrarymember{operator"!=}{path}%
-\begin{itemdecl}
-bool operator!=(const path& lhs, const path& rhs) noexcept;
-\end{itemdecl}
-
-\begin{itemdescr}
-\pnum
-\returns \tcode{!(lhs == rhs)}.
 \end{itemdescr}
 
 \indexlibrarymember{operator/}{path}%
@@ -13395,11 +13418,11 @@ namespace std::filesystem {
     file_status symlink_status() const;
     file_status symlink_status(error_code& ec) const noexcept;
 
-    bool operator< (const directory_entry& rhs) const noexcept;
     bool operator==(const directory_entry& rhs) const noexcept;
     bool operator!=(const directory_entry& rhs) const noexcept;
-    bool operator<=(const directory_entry& rhs) const noexcept;
+    bool operator< (const directory_entry& rhs) const noexcept;
     bool operator> (const directory_entry& rhs) const noexcept;
+    bool operator<=(const directory_entry& rhs) const noexcept;
     bool operator>=(const directory_entry& rhs) const noexcept;
 
   private:
@@ -13792,16 +13815,6 @@ bool operator< (const directory_entry& rhs) const noexcept;
 \returns \tcode{pathobject < rhs.pathobject}.
 \end{itemdescr}
 
-\indexlibrarymember{operator<=}{directory_entry}%
-\begin{itemdecl}
-bool operator<=(const directory_entry& rhs) const noexcept;
-\end{itemdecl}
-
-\begin{itemdescr}
-\pnum
-\returns \tcode{pathobject <= rhs.pathobject}.
-\end{itemdescr}
-
 \indexlibrarymember{operator>}{directory_entry}%
 \begin{itemdecl}
 bool operator> (const directory_entry& rhs) const noexcept;
@@ -13810,6 +13823,16 @@ bool operator> (const directory_entry& rhs) const noexcept;
 \begin{itemdescr}
 \pnum
 \returns \tcode{pathobject > rhs.pathobject}.
+\end{itemdescr}
+
+\indexlibrarymember{operator<=}{directory_entry}%
+\begin{itemdecl}
+bool operator<=(const directory_entry& rhs) const noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns \tcode{pathobject <= rhs.pathobject}.
 \end{itemdescr}
 
 \indexlibrarymember{operator>=}{directory_entry}%
@@ -13869,8 +13892,8 @@ namespace std::filesystem {
 \end{codeblock}
 
 \pnum
- \tcode{directory_iterator} satisfies the requirements of an input
-iterator\iref{input.iterators}.
+ \tcode{directory_iterator} satisfies the
+ \oldconcept{InputIterator} requirements\iref{input.iterators}.
 
 \pnum
 If an iterator of type \tcode{directory_iterator} reports an error or
@@ -14342,6 +14365,11 @@ void pop(error_code& ec);
   iterated over, and continue iteration over the parent directory.
 
 \pnum
+\postconditions Any copies of the previous value of \tcode{*this}
+are no longer required
+to be dereferenceable nor to be in the domain of \tcode{==}.
+
+\pnum
 \throws As specified in~\ref{fs.err.report}.
 \end{itemdescr}
 
@@ -14799,20 +14827,17 @@ bool create_directory(const path& p, const path& existing_p, error_code& ec) noe
 
 \begin{itemdescr}
 \pnum
-\effects Establishes the postcondition by attempting to create the
+\effects Creates the
   directory \tcode{p} resolves to, with
   attributes copied from directory \tcode{existing_p}. The set of attributes
-  copied is operating system dependent. Creation failure because \tcode{p} resolves to an existing directory shall not be
-  treated as an error.
+  copied is operating system dependent.
+  Creation failure because \tcode{p} already exists is not an error.
 \begin{note} For POSIX-based operating systems, the
       attributes are those copied by native API \tcode{stat(existing_p.c_str(), \&attributes_stat)}
       followed by \tcode{mkdir(p.c_str(), attributes_stat.st_mode)}. For
       Windows-based operating systems, the attributes are those copied by native
       API \tcode{CreateDirectoryExW(existing_p.c_str(), p.c_str(), 0)}.
 \end{note}
-
-\pnum
-\postconditions \tcode{is_directory(p)}.
 
 \pnum
 \returns \tcode{true} if a new directory was created, otherwise \tcode{false}.
@@ -14943,7 +14968,7 @@ path current_path(error_code& ec);
 
 \pnum
 \begin{note} The current path as returned by many operating systems is a dangerous
-  global variable. It may be changed unexpectedly by a third-party or system
+  global variable. It may be changed unexpectedly by third-party or system
   library functions, or by another thread. \end{note}
 \end{itemdescr}
 

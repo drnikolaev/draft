@@ -17,6 +17,7 @@ characteristics of the predefined types,
 functions supporting start and termination of a \Cpp{} program,
 support for dynamic memory management,
 support for dynamic type identification,
+support for contract violation handling,
 support for exception processing, support for initializer lists,
 and other runtime support,
 as summarized in \tref{lang.sup.lib.summary}.
@@ -32,6 +33,7 @@ as summarized in \tref{lang.sup.lib.summary}.
 \ref{support.start.term}  & Start and termination     &   \tcode{<cstdlib>}   \\ \rowsep
 \ref{support.dynamic}     & Dynamic memory management &   \tcode{<new>}       \\ \rowsep
 \ref{support.rtti}        & Type identification       &   \tcode{<typeinfo>}  \\ \rowsep
+\ref{support.contract}    & Contract violation handling & \tcode{<contract>}  \\ \rowsep
 \ref{support.exception}   & Exception handling        &   \tcode{<exception>} \\ \rowsep
 \ref{support.initlist}    & Initializer lists    & \tcode{<initializer_list>} \\ \rowsep
 \ref{cmp}                 & Comparisons               &   \tcode{<compare>}   \\ \rowsep
@@ -300,7 +302,7 @@ the C standard library header \tcode{<stddef.h>}, but
 accepts a restricted set of \tcode{\placeholder{type}}
 arguments in this document.
 Use of the \tcode{offsetof} macro with a \tcode{\placeholder{type}}
-other than a standard-layout class\iref{class}
+other than a standard-layout class\iref{class.prop}
 is conditionally-supported.\footnote{Note that \tcode{offsetof}
 is required to work as specified even if unary
 \tcode{operator\&}
@@ -516,6 +518,176 @@ The header \tcode{<version>}
 supplies implementation-dependent information
 about the C++ standard library
 (e.g., version number and release date).
+
+\pnum
+The macros in \tref{support.ft} are defined
+after inclusion of the header \tcode{<version>} or
+one of the corresponding headers specified in the table.
+\begin{note}
+Future versions of this International Standard might replace
+the values of these macros with greater values.
+\end{note}
+
+\begin{LongTable}{Standard library feature-test macros}
+{tab:support.ft}{llx{.3\hsize}}
+\\ \topline
+\lhdr{Macro name} & \chdr{Value} & \rhdr{Header(s)} \\ \capsep
+\endfirsthead
+\continuedcaption \\
+\hline
+\lhdr{Macro name} & \chdr{Value} & \rhdr{Header(s)} \\ \capsep
+\endhead
+\defnlibxname{cpp_lib_addressof_constexpr}                  & \tcode{201603L} &
+  \tcode{<memory>} \\ \rowsep
+\defnlibxname{cpp_lib_allocator_traits_is_always_equal}     & \tcode{201411L} &
+  \tcode{<memory>} \tcode{<scoped_allocator>} \tcode{<string>}
+  \tcode{<deque>} \tcode{<forward_list>} \tcode{<list>} \tcode{<vector>}
+  \tcode{<map>} \tcode{<set>} \tcode{<unordered_map>}
+  \tcode{<unordered_set>} \\ \rowsep
+\defnlibxname{cpp_lib_any}                                  & \tcode{201606L} &
+  \tcode{<any>} \\ \rowsep
+\defnlibxname{cpp_lib_apply}                                & \tcode{201603L} &
+  \tcode{<tuple>} \\ \rowsep
+\defnlibxname{cpp_lib_array_constexpr}                      & \tcode{201603L} &
+  \tcode{<iterator>} \tcode{<array>} \\ \rowsep
+\defnlibxname{cpp_lib_as_const}                             & \tcode{201510L} &
+  \tcode{<utility>} \\ \rowsep
+\defnlibxname{cpp_lib_atomic_is_always_lock_free}           & \tcode{201603L} &
+  \tcode{<atomic>} \\ \rowsep
+\defnlibxname{cpp_lib_atomic_ref}                           & \tcode{201806L} &
+  \tcode{<atomic>} \\ \rowsep
+\defnlibxname{cpp_lib_bit_cast}                             & \tcode{201806L} &
+  \tcode{<bit>} \\ \rowsep
+\defnlibxname{cpp_lib_bool_constant}                        & \tcode{201505L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_boyer_moore_searcher}                 & \tcode{201603L} &
+  \tcode{<functional>} \\ \rowsep
+\defnlibxname{cpp_lib_byte}                                 & \tcode{201603L} &
+  \tcode{<cstddef>} \\ \rowsep
+\defnlibxname{cpp_lib_chrono}                               & \tcode{201611L} &
+  \tcode{<chrono>} \\ \rowsep
+\defnlibxname{cpp_lib_clamp}                                & \tcode{201603L} &
+  \tcode{<algorithm>} \\ \rowsep
+\defnlibxname{cpp_lib_complex_udls}                         & \tcode{201309L} &
+  \tcode{<complex>} \\ \rowsep
+\defnlibxname{cpp_lib_concepts}                             & \tcode{201806L} &
+  \tcode{<concepts>} \\ \rowsep
+\defnlibxname{cpp_lib_constexpr_swap_algorithms}            & \tcode{201806L} &
+  \tcode{<algorithm>} \\ \rowsep
+\defnlibxname{cpp_lib_enable_shared_from_this}              & \tcode{201603L} &
+  \tcode{<memory>} \\ \rowsep
+\defnlibxname{cpp_lib_exchange_function}                    & \tcode{201304L} &
+  \tcode{<utility>} \\ \rowsep
+\defnlibxname{cpp_lib_execution}                            & \tcode{201603L} &
+  \tcode{<execution>} \\ \rowsep
+\defnlibxname{cpp_lib_filesystem}                           & \tcode{201703L} &
+  \tcode{<filesystem>} \\ \rowsep
+\defnlibxname{cpp_lib_gcd_lcm}                              & \tcode{201606L} &
+  \tcode{<numeric>} \\ \rowsep
+\defnlibxname{cpp_lib_generic_associative_lookup}           & \tcode{201304L} &
+  \tcode{<map>} \tcode{<set>} \\ \rowsep
+\defnlibxname{cpp_lib_hardware_interference_size}           & \tcode{201703L} &
+  \tcode{<new>} \\ \rowsep
+\defnlibxname{cpp_lib_has_unique_object_representations}    & \tcode{201606L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_hypot}                                & \tcode{201603L} &
+  \tcode{<cmath>} \\ \rowsep
+\defnlibxname{cpp_lib_incomplete_container_elements}        & \tcode{201505L} &
+  \tcode{<forward_list>} \tcode{<list>} \tcode{<vector>} \\ \rowsep
+\defnlibxname{cpp_lib_integer_sequence}                     & \tcode{201304L} &
+  \tcode{<utility>} \\ \rowsep
+\defnlibxname{cpp_lib_integral_constant_callable}           & \tcode{201304L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_invoke}                               & \tcode{201411L} &
+  \tcode{<functional>} \\ \rowsep
+\defnlibxname{cpp_lib_is_aggregate}                         & \tcode{201703L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_is_final}                             & \tcode{201402L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_is_invocable}                         & \tcode{201703L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_is_null_pointer}                      & \tcode{201309L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_is_swappable}                         & \tcode{201603L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_launder}                              & \tcode{201606L} &
+  \tcode{<new>} \\ \rowsep
+\defnlibxname{cpp_lib_list_remove_return_type}              & \tcode{201806L} &
+  \tcode{<forward_list>} \tcode{<list>} \\ \rowsep
+\defnlibxname{cpp_lib_logical_traits}                       & \tcode{201510L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_make_from_tuple}                      & \tcode{201606L} &
+  \tcode{<tuple>} \\ \rowsep
+\defnlibxname{cpp_lib_make_reverse_iterator}                & \tcode{201402L} &
+  \tcode{<iterator>} \\ \rowsep
+\defnlibxname{cpp_lib_make_unique}                          & \tcode{201304L} &
+  \tcode{<memory>} \\ \rowsep
+\defnlibxname{cpp_lib_map_try_emplace}                      & \tcode{201411L} &
+  \tcode{<map>} \\ \rowsep
+\defnlibxname{cpp_lib_math_special_functions}               & \tcode{201603L} &
+  \tcode{<cmath>} \\ \rowsep
+\defnlibxname{cpp_lib_memory_resource}                      & \tcode{201603L} &
+  \tcode{<memory_resource>} \\ \rowsep
+\defnlibxname{cpp_lib_node_extract}                         & \tcode{201606L} &
+  \tcode{<map>} \tcode{<set>} \tcode{<unordered_map>}
+  \tcode{<unordered_set>} \\ \rowsep
+\defnlibxname{cpp_lib_nonmember_container_access}           & \tcode{201411L} &
+  \tcode{<iterator>} \tcode{<array>} \tcode{<deque>} \tcode{<forward_list>}
+  \tcode{<list>} \tcode{<map>} \tcode{<regex>} \tcode{<set>} \tcode{<string>}
+  \tcode{<unordered_map>} \tcode{<unordered_set>} \tcode{<vector>} \\ \rowsep
+\defnlibxname{cpp_lib_not_fn}                               & \tcode{201603L} &
+  \tcode{<functional>} \\ \rowsep
+\defnlibxname{cpp_lib_null_iterators}                       & \tcode{201304L} &
+  \tcode{<iterator>} \\ \rowsep
+\defnlibxname{cpp_lib_optional}                             & \tcode{201606L} &
+  \tcode{<optional>} \\ \rowsep
+\defnlibxname{cpp_lib_parallel_algorithm}                   & \tcode{201603L} &
+  \tcode{<algorithm>} \tcode{<numeric>} \\ \rowsep
+\defnlibxname{cpp_lib_quoted_string_io}                     & \tcode{201304L} &
+  \tcode{<iomanip>} \\ \rowsep
+\defnlibxname{cpp_lib_raw_memory_algorithms}                & \tcode{201606L} &
+  \tcode{<memory>} \\ \rowsep
+\defnlibxname{cpp_lib_result_of_sfinae}                     & \tcode{201210L} &
+  \tcode{<functional>} \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_robust_nonmodifying_seq_ops}          & \tcode{201304L} &
+  \tcode{<algorithm>} \\ \rowsep
+\defnlibxname{cpp_lib_sample}                               & \tcode{201603L} &
+  \tcode{<algorithm>} \\ \rowsep
+\defnlibxname{cpp_lib_scoped_lock}                          & \tcode{201703L} &
+  \tcode{<mutex>} \\ \rowsep
+\defnlibxname{cpp_lib_shared_mutex}                         & \tcode{201505L} &
+  \tcode{<shared_mutex>} \\ \rowsep
+\defnlibxname{cpp_lib_shared_ptr_arrays}                    & \tcode{201611L} &
+  \tcode{<memory>} \\ \rowsep
+\defnlibxname{cpp_lib_shared_ptr_weak_type}                 & \tcode{201606L} &
+  \tcode{<memory>} \\ \rowsep
+\defnlibxname{cpp_lib_shared_timed_mutex}                   & \tcode{201402L} &
+  \tcode{<shared_mutex>} \\ \rowsep
+\defnlibxname{cpp_lib_string_udls}                          & \tcode{201304L} &
+  \tcode{<string>} \\ \rowsep
+\defnlibxname{cpp_lib_string_view}                          & \tcode{201606L} &
+  \tcode{<string>} \tcode{<string_view>} \\ \rowsep
+\defnlibxname{cpp_lib_to_chars}                             & \tcode{201611L} &
+  \tcode{<utility>} \\ \rowsep
+\defnlibxname{cpp_lib_transformation_trait_aliases}         & \tcode{201304L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_transparent_operators}                & \tcode{201510L} &
+  \tcode{<memory>} \tcode{<functional>} \\ \rowsep
+\defnlibxname{cpp_lib_tuple_element_t}                      & \tcode{201402L} &
+  \tcode{<tuple>} \\ \rowsep
+\defnlibxname{cpp_lib_tuples_by_type}                       & \tcode{201304L} &
+  \tcode{<utility>} \tcode{<tuple>} \\ \rowsep
+\defnlibxname{cpp_lib_type_trait_variable_templates}        & \tcode{201510L} &
+  \tcode{<type_traits>} \\ \rowsep
+\defnlibxname{cpp_lib_uncaught_exceptions}                  & \tcode{201411L} &
+  \tcode{<exception>} \\ \rowsep
+\defnlibxname{cpp_lib_unordered_map_try_emplace}            & \tcode{201411L} &
+  \tcode{<unordered_map>} \\ \rowsep
+\defnlibxname{cpp_lib_variant}                              & \tcode{201606L} &
+  \tcode{<variant>} \\ \rowsep
+\defnlibxname{cpp_lib_void_t}                               & \tcode{201411L} &
+  \tcode{<type_traits>} \\ \rowsep
+\end{LongTable}
 
 \rSec2[limits.syn]{Header \tcode{<limits>} synopsis}
 \indexhdr{limits}%
@@ -1717,7 +1889,7 @@ by throwing an exception that is caught in
 \tcode{main}.}
 
 If control leaves a registered function called by \tcode{exit} because the function does
-not provide a handler for a thrown exception, \tcode{std::terminate()} shall be called\iref{except.terminate}.%
+not provide a handler for a thrown exception, the function \tcode{std::terminate} shall be called\iref{except.terminate}.%
 \indexlibrary{\idxcode{terminate}}%
 
 \item
@@ -1794,7 +1966,7 @@ reverse order of their registration, except that a function shall be called afte
 previously registered functions that had already been called at the time it was
 registered. Objects shall not be destroyed as a result of calling \tcode{quick_exit}.
 If control leaves a registered function called by \tcode{quick_exit} because the
-function does not provide a handler for a thrown exception, \tcode{std::terminate()} shall
+function does not provide a handler for a thrown exception, the function \tcode{std::terminate} shall
 be called.\indexlibrary{\idxcode{terminate}}
 \begin{note}
 A function registered via \tcode{at_quick_exit}
@@ -1826,12 +1998,19 @@ It also defines components for reporting storage management errors.
 \rSec2[new.syn]{Header \tcode{<new>} synopsis}
 \indexhdr{new}%
 \indexlibrary{\idxcode{align_val_t}}%
+\indexlibrary{\idxcode{destroying_delete_t}}%
+\indexlibrary{\idxcode{destroying_delete}}%
 \indexlibrary{\idxcode{nothrow_t}}%
 \indexlibrary{\idxcode{nothrow}}%
 \begin{codeblock}
 namespace std {
   class bad_alloc;
   class bad_array_new_length;
+
+  struct destroying_delete_t {
+    explicit destroying_delete_t() = default;
+  };
+  inline constexpr destroying_delete_t destroying_delete{};
 
   enum class align_val_t : size_t {};
 
@@ -3078,6 +3257,99 @@ suitable for conversion and display as a
 \tcode{wstring}~(\ref{string.classes}, \ref{locale.codecvt})
 \end{itemdescr}
 
+\rSec1[support.contract]{Contract violation handling}
+
+\rSec2[contract.syn]{Header \tcode{<contract>} synopsis}
+
+The header \tcode{<contract>} defines a type
+for reporting information about contract violations
+generated by the implementation.
+\begin{codeblock}
+namespace std {
+  class contract_violation;
+}
+\end{codeblock}
+
+\rSec2[support.contract.cviol]{Class \tcode{contract_violation}}
+\indexlibrary{\idxcode{contract_violation}}%
+
+\begin{codeblock}
+namespace std {
+  class contract_violation {
+  public:
+    uint_least32_t line_number() const noexcept;
+    string_view file_name() const noexcept;
+    string_view function_name() const noexcept;
+    string_view comment() const noexcept;
+    string_view assertion_level() const noexcept;
+  };
+}
+\end{codeblock}
+
+\pnum
+The class \tcode{contract_violation} describes information about
+a contract violation generated by the implementation.
+
+\indexlibrarymember{line_number}{contract_violation}%
+\begin{itemdecl}
+uint_least32_t line_number() const noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns The source code location
+where the contract violation happened\iref{dcl.attr.contract}.
+If the location is unknown, an implementation may return \tcode{0}.
+\end{itemdescr}
+
+\indexlibrarymember{file_name}{contract_violation}%
+\begin{itemdecl}
+string_view file_name() const noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns The source file name
+where the contract violation happened\iref{dcl.attr.contract}.
+If the file name is unknown,
+an implementation may return \tcode{string_view\{\}}.
+\end{itemdescr}
+
+\indexlibrarymember{function_name}{contract_violation}%
+\begin{itemdecl}
+string_view function_name() const noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns The name of the function
+where the contract violation happened\iref{dcl.attr.contract}.
+If the function name is unknown,
+an implementation may return \tcode{string_view\{\}}.
+\end{itemdescr}
+
+\indexlibrarymember{comment}{contract_violation}%
+\begin{itemdecl}
+string_view comment() const noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns Implementation-defined text describing
+the predicate of the violated contract.
+\end{itemdescr}
+
+\indexlibrarymember{assertion_level}{contract_violation}%
+\begin{itemdecl}
+string_view assertion_level() const noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns Text describing the \grammarterm{assertion-level}
+of the violated contract.
+\end{itemdescr}
+
 \rSec1[support.exception]{Exception handling}
 
 \pnum
@@ -3377,8 +3649,8 @@ The number of uncaught exceptions\iref{except.uncaught}.
 \pnum
 \remarks
 When \tcode{uncaught_exceptions() > 0},
-throwing an exception can result in a call of\\
-\tcode{std::terminate()}\iref{except.terminate}.
+throwing an exception can result in a call of the function
+\tcode{std::terminate}\iref{except.terminate}.
 \end{itemdescr}
 
 \rSec2[propagation]{Exception propagation}
@@ -3394,7 +3666,7 @@ The type \tcode{exception_ptr} can be used to refer to an exception object.
 
 \pnum
 \tcode{exception_ptr} shall satisfy the requirements of
-\tcode{NullablePointer} (\tref{nullablepointer}).
+\oldconcept{NullablePointer} (\tref{nullablepointer}).
 
 \pnum
 Two non-null values of type \tcode{exception_ptr} are equivalent and compare equal if and
@@ -3533,7 +3805,7 @@ nested_exception() noexcept;
 
 \begin{itemdescr}
 \pnum
-\effects If \tcode{nested_ptr()} returns a null pointer, the function calls \tcode{std::terminate()}.
+\effects If \tcode{nested_ptr()} returns a null pointer, the function calls the function \tcode{std::terminate}.
 Otherwise, it throws the stored exception captured by \tcode{*this}.
 \end{itemdescr}
 
@@ -3557,7 +3829,7 @@ template<class T> [[noreturn]] void throw_with_nested(T&& t);
 Let \tcode{U} be \tcode{decay_t<T>}.
 
 \pnum
-\requires \tcode{U} shall be \tcode{CopyConstructible}.
+\requires \tcode{U} shall be \oldconcept{CopyConstructible}.
 
 \pnum
 \throws
@@ -3714,7 +3986,7 @@ template<class E> constexpr const E* end(initializer_list<E> il) noexcept;
 
 \rSec1[cmp]{Comparisons}
 
-\rSec2[cmp.syn]{Header \tcode{<compare>} synopsis}
+\rSec2[compare.syn]{Header \tcode{<compare>} synopsis}
 
 \pnum
 The header \tcode{<compare>} specifies types, objects, and functions
@@ -4026,14 +4298,14 @@ namespace std {
     friend constexpr bool operator==(partial_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator!=(partial_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator< (partial_ordering v, @\unspec@) noexcept;
-    friend constexpr bool operator<=(partial_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator> (partial_ordering v, @\unspec@) noexcept;
+    friend constexpr bool operator<=(partial_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator>=(partial_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator==(@\unspec@, partial_ordering v) noexcept;
     friend constexpr bool operator!=(@\unspec@, partial_ordering v) noexcept;
     friend constexpr bool operator< (@\unspec@, partial_ordering v) noexcept;
-    friend constexpr bool operator<=(@\unspec@, partial_ordering v) noexcept;
     friend constexpr bool operator> (@\unspec@, partial_ordering v) noexcept;
+    friend constexpr bool operator<=(@\unspec@, partial_ordering v) noexcept;
     friend constexpr bool operator>=(@\unspec@, partial_ordering v) noexcept;
     friend constexpr partial_ordering operator<=>(partial_ordering v, @\unspec@) noexcept;
     friend constexpr partial_ordering operator<=>(@\unspec@, partial_ordering v) noexcept;
@@ -4063,14 +4335,14 @@ The result is independent of the \tcode{is_ordered} member.
 
 \indexlibrarymember{operator==}{partial_ordering}%
 \indexlibrarymember{operator<}{partial_ordering}%
-\indexlibrarymember{operator<=}{partial_ordering}%
 \indexlibrarymember{operator>}{partial_ordering}%
+\indexlibrarymember{operator<=}{partial_ordering}%
 \indexlibrarymember{operator>=}{partial_ordering}%
 \begin{itemdecl}
 constexpr bool operator==(partial_ordering v, @\unspec@) noexcept;
 constexpr bool operator< (partial_ordering v, @\unspec@) noexcept;
-constexpr bool operator<=(partial_ordering v, @\unspec@) noexcept;
 constexpr bool operator> (partial_ordering v, @\unspec@) noexcept;
+constexpr bool operator<=(partial_ordering v, @\unspec@) noexcept;
 constexpr bool operator>=(partial_ordering v, @\unspec@) noexcept;
 \end{itemdecl}
 
@@ -4082,14 +4354,14 @@ For \tcode{operator@}, \tcode{v.is_ordered \&\& v.value @ 0}.
 
 \indexlibrarymember{operator==}{partial_ordering}%
 \indexlibrarymember{operator<}{partial_ordering}%
-\indexlibrarymember{operator<=}{partial_ordering}%
 \indexlibrarymember{operator>}{partial_ordering}%
+\indexlibrarymember{operator<=}{partial_ordering}%
 \indexlibrarymember{operator>=}{partial_ordering}%
 \begin{itemdecl}
 constexpr bool operator==(@\unspec@, partial_ordering v) noexcept;
 constexpr bool operator< (@\unspec@, partial_ordering v) noexcept;
-constexpr bool operator<=(@\unspec@, partial_ordering v) noexcept;
 constexpr bool operator> (@\unspec@, partial_ordering v) noexcept;
+constexpr bool operator<=(@\unspec@, partial_ordering v) noexcept;
 constexpr bool operator>=(@\unspec@, partial_ordering v) noexcept;
 \end{itemdecl}
 
@@ -4168,14 +4440,14 @@ namespace std {
     friend constexpr bool operator==(weak_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator!=(weak_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator< (weak_ordering v, @\unspec@) noexcept;
-    friend constexpr bool operator<=(weak_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator> (weak_ordering v, @\unspec@) noexcept;
+    friend constexpr bool operator<=(weak_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator>=(weak_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator==(@\unspec@, weak_ordering v) noexcept;
     friend constexpr bool operator!=(@\unspec@, weak_ordering v) noexcept;
     friend constexpr bool operator< (@\unspec@, weak_ordering v) noexcept;
-    friend constexpr bool operator<=(@\unspec@, weak_ordering v) noexcept;
     friend constexpr bool operator> (@\unspec@, weak_ordering v) noexcept;
+    friend constexpr bool operator<=(@\unspec@, weak_ordering v) noexcept;
     friend constexpr bool operator>=(@\unspec@, weak_ordering v) noexcept;
     friend constexpr weak_ordering operator<=>(weak_ordering v, @\unspec@) noexcept;
     friend constexpr weak_ordering operator<=>(@\unspec@, weak_ordering v) noexcept;
@@ -4217,15 +4489,15 @@ value < 0  ? partial_ordering::less :
 \indexlibrarymember{operator==}{weak_ordering}%
 \indexlibrarymember{operator"!=}{weak_ordering}%
 \indexlibrarymember{operator<}{weak_ordering}%
-\indexlibrarymember{operator<=}{weak_ordering}%
 \indexlibrarymember{operator>}{weak_ordering}%
+\indexlibrarymember{operator<=}{weak_ordering}%
 \indexlibrarymember{operator>=}{weak_ordering}%
 \begin{itemdecl}
 constexpr bool operator==(weak_ordering v, @\unspec@) noexcept;
 constexpr bool operator!=(weak_ordering v, @\unspec@) noexcept;
 constexpr bool operator< (weak_ordering v, @\unspec@) noexcept;
-constexpr bool operator<=(weak_ordering v, @\unspec@) noexcept;
 constexpr bool operator> (weak_ordering v, @\unspec@) noexcept;
+constexpr bool operator<=(weak_ordering v, @\unspec@) noexcept;
 constexpr bool operator>=(weak_ordering v, @\unspec@) noexcept;
 \end{itemdecl}
 
@@ -4238,15 +4510,15 @@ constexpr bool operator>=(weak_ordering v, @\unspec@) noexcept;
 \indexlibrarymember{operator==}{weak_ordering}%
 \indexlibrarymember{operator"!=}{weak_ordering}%
 \indexlibrarymember{operator<}{weak_ordering}%
-\indexlibrarymember{operator<=}{weak_ordering}%
 \indexlibrarymember{operator>}{weak_ordering}%
+\indexlibrarymember{operator<=}{weak_ordering}%
 \indexlibrarymember{operator>=}{weak_ordering}%
 \begin{itemdecl}
 constexpr bool operator==(@\unspec@, weak_ordering v) noexcept;
 constexpr bool operator!=(@\unspec@, weak_ordering v) noexcept;
 constexpr bool operator< (@\unspec@, weak_ordering v) noexcept;
-constexpr bool operator<=(@\unspec@, weak_ordering v) noexcept;
 constexpr bool operator> (@\unspec@, weak_ordering v) noexcept;
+constexpr bool operator<=(@\unspec@, weak_ordering v) noexcept;
 constexpr bool operator>=(@\unspec@, weak_ordering v) noexcept;
 \end{itemdecl}
 
@@ -4317,14 +4589,14 @@ namespace std {
     friend constexpr bool operator==(strong_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator!=(strong_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator< (strong_ordering v, @\unspec@) noexcept;
-    friend constexpr bool operator<=(strong_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator> (strong_ordering v, @\unspec@) noexcept;
+    friend constexpr bool operator<=(strong_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator>=(strong_ordering v, @\unspec@) noexcept;
     friend constexpr bool operator==(@\unspec@, strong_ordering v) noexcept;
     friend constexpr bool operator!=(@\unspec@, strong_ordering v) noexcept;
     friend constexpr bool operator< (@\unspec@, strong_ordering v) noexcept;
-    friend constexpr bool operator<=(@\unspec@, strong_ordering v) noexcept;
     friend constexpr bool operator> (@\unspec@, strong_ordering v) noexcept;
+    friend constexpr bool operator<=(@\unspec@, strong_ordering v) noexcept;
     friend constexpr bool operator>=(@\unspec@, strong_ordering v) noexcept;
     friend constexpr strong_ordering operator<=>(strong_ordering v, @\unspec@) noexcept;
     friend constexpr strong_ordering operator<=>(@\unspec@, strong_ordering v) noexcept;
@@ -4393,15 +4665,15 @@ value < 0  ? weak_ordering::less :
 \indexlibrarymember{operator==}{strong_ordering}%
 \indexlibrarymember{operator"!=}{strong_ordering}%
 \indexlibrarymember{operator<}{strong_ordering}%
-\indexlibrarymember{operator<=}{strong_ordering}%
 \indexlibrarymember{operator>}{strong_ordering}%
+\indexlibrarymember{operator<=}{strong_ordering}%
 \indexlibrarymember{operator>=}{strong_ordering}%
 \begin{itemdecl}
 constexpr bool operator==(strong_ordering v, @\unspec@) noexcept;
 constexpr bool operator!=(strong_ordering v, @\unspec@) noexcept;
 constexpr bool operator< (strong_ordering v, @\unspec@) noexcept;
-constexpr bool operator<=(strong_ordering v, @\unspec@) noexcept;
 constexpr bool operator> (strong_ordering v, @\unspec@) noexcept;
+constexpr bool operator<=(strong_ordering v, @\unspec@) noexcept;
 constexpr bool operator>=(strong_ordering v, @\unspec@) noexcept;
 \end{itemdecl}
 
@@ -4414,15 +4686,15 @@ constexpr bool operator>=(strong_ordering v, @\unspec@) noexcept;
 \indexlibrarymember{operator==}{strong_ordering}%
 \indexlibrarymember{operator"!=}{strong_ordering}%
 \indexlibrarymember{operator<}{strong_ordering}%
-\indexlibrarymember{operator<=}{strong_ordering}%
 \indexlibrarymember{operator>}{strong_ordering}%
+\indexlibrarymember{operator<=}{strong_ordering}%
 \indexlibrarymember{operator>=}{strong_ordering}%
 \begin{itemdecl}
 constexpr bool operator==(@\unspec@, strong_ordering v) noexcept;
 constexpr bool operator!=(@\unspec@, strong_ordering v) noexcept;
 constexpr bool operator< (@\unspec@, strong_ordering v) noexcept;
-constexpr bool operator<=(@\unspec@, strong_ordering v) noexcept;
 constexpr bool operator> (@\unspec@, strong_ordering v) noexcept;
+constexpr bool operator<=(@\unspec@, strong_ordering v) noexcept;
 constexpr bool operator>=(@\unspec@, strong_ordering v) noexcept;
 \end{itemdecl}
 
@@ -4591,7 +4863,7 @@ are each well-formed and convertible to \tcode{bool}, then
 if \tcode{a == b} is \tcode{true},
 returns \tcode{partial_ordering::equivalent};
 \item
-otherwise, if \tcode{a < b is true},
+otherwise, if \tcode{a < b} is \tcode{true},
 returns \tcode{partial_ordering::less};
 \item
 otherwise, returns \tcode{partial_ordering::greater}.

@@ -217,10 +217,8 @@ using N::d;                     // declares \tcode{d}
 \indextext{implementation-generated}%
 In some circumstances, \Cpp{} implementations implicitly define the
 default constructor\iref{class.ctor},
-copy constructor\iref{class.copy},
-move constructor\iref{class.copy},
-copy assignment operator\iref{class.copy},
-move assignment operator\iref{class.copy},
+copy constructor, move constructor\iref{class.copy.ctor},
+copy assignment operator, move assignment operator\iref{class.copy.assign},
 or destructor\iref{class.dtor} member functions.
 \end{note}
 \begin{example} Given
@@ -262,8 +260,11 @@ A class name can also be implicitly declared by an
 
 \pnum
 \indextext{type!incomplete}%
-A program is ill-formed if the definition of any object gives the object
-an incomplete type\iref{basic.types}.
+In the definition of an object,
+the type of that object shall not be
+an incomplete type\iref{basic.types},
+an abstract class type\iref{class.abstract}, or
+a (possibly multi-dimensional) array thereof.
 
 \indextext{object!definition}%
 \indextext{function!definition}%
@@ -341,7 +342,7 @@ A function is \defn{named by an expression} as follows:
   non-default initialization\iref{dcl.init}.
   A constructor selected to copy or move an object of class type
   is considered to be named by an expression
-  even if the call is actually elided by the implementation\iref{class.copy}. \end{note}
+  even if the call is actually elided by the implementation\iref{class.copy.elision}. \end{note}
 \item
   An allocation or deallocation function for a class
   is named by a \grammarterm{new-expression}
@@ -354,7 +355,7 @@ A function is \defn{named by an expression} as follows:
 
 \pnum
 A variable \tcode{x} whose name appears as a
-potentially-evaluated expression \tcode{ex} is \defn{odr-used} by \tcode{ex} unless
+potentially-evaluated expression \tcode{ex} is \defnx{odr-used}{odr-use} by \tcode{ex} unless
 applying the lvalue-to-rvalue conversion\iref{conv.lval} to \tcode{x} yields
 a constant expression\iref{expr.const} that does not invoke any non-trivial
 functions
@@ -389,7 +390,7 @@ is a permissible implementation technique.}
 An assignment operator function in a class is odr-used by an
 implicitly-defined
 copy-assignment or move-assignment function for another class as specified
-in~\ref{class.copy}.
+in~\ref{class.copy.assign}.
 A constructor for a class is odr-used as specified
 in~\ref{dcl.init}. A destructor for a class is odr-used if it is potentially
 invoked\iref{class.dtor}.
@@ -439,8 +440,9 @@ function or variable that is odr-used in that program
 outside of a discarded statement\iref{stmt.if}; no diagnostic required.
 The definition can appear explicitly in the program, it can be found in
 the standard or a user-defined library, or (when appropriate) it is
-implicitly defined (see~\ref{class.ctor}, \ref{class.dtor} and
-\ref{class.copy}). An inline function or variable shall be defined in every
+implicitly defined (see~\ref{class.ctor}, \ref{class.dtor},
+\ref{class.copy.ctor}, and \ref{class.copy.assign}).
+An inline function or variable shall be defined in every
 translation unit in which it is odr-used outside of a discarded statement.
 
 \pnum
@@ -550,6 +552,14 @@ the default argument has subexpressions with default arguments, this
 requirement applies recursively)\footnote{\ref{dcl.fct.default}
 describes how default argument names are looked up.}; and
 
+\item if \tcode{D} invokes a function with a precondition,
+or is a function
+that contains an assertion or has a contract condition\iref{dcl.attr.contract},
+it is \impldef{consistency of build level and violation continuation mode}
+under which conditions all definitions of \tcode{D}
+shall be translated using the same build level
+and violation continuation mode; and
+
 \item if \tcode{D} is a class with an implicitly-declared
 constructor\iref{class.ctor}, it is as if the constructor was
 implicitly defined in every translation unit where it is odr-used, and the
@@ -614,7 +624,7 @@ Every name is introduced in some portion of program text called a
 \indextext{region!declarative}%
 \indextext{scope!potential}%
 \defn{declarative region}, which is the largest part of the program
-in which that name is \defn{valid}, that is, in which that name may
+in which that name is valid, that is, in which that name may
 be used as an unqualified name to refer to the same entity. In general,
 each particular name is valid only within some possibly discontiguous
 portion of program text called its \defn{scope}. To determine the
@@ -734,7 +744,7 @@ immediately after the \grammarterm{identifier} (if any) in either its
 \grammarterm{enum-specifier}\iref{dcl.enum} or its first
 \grammarterm{opaque-enum-declaration}\iref{dcl.enum}, whichever comes first.
 The point of declaration of an alias or alias template immediately
-follows the \grammarterm{type-id} to which the
+follows the \grammarterm{defining-type-id} to which the
 alias refers.
 
 \pnum
@@ -808,8 +818,13 @@ the opening brace of the class definition.
 
 \pnum
 The point of declaration for a function-local predefined
-variable\iref{dcl.fct.def} is immediately before the
+variable\iref{dcl.fct.def.general} is immediately before the
 \grammarterm{function-body} of a function definition.
+
+\pnum
+The point of declaration of a structured binding\iref{dcl.struct.bind}
+is immediately after
+the \grammarterm{identifier-list} of the structured binding declaration.
 
 \pnum
 The point of declaration for the variable or the structured bindings
@@ -975,11 +990,8 @@ A name with global namespace scope is said to be a
 \pnum
 The potential scope of a name declared in a class consists not
 only of the declarative region following the name's point of
-declaration, but also of all function bodies, default arguments,
-\grammarterm{noexcept-specifier}{s}, and
-default member initializers\iref{class.mem}
-in that class (including such
-things in nested classes).
+declaration, but also of all complete-class contexts\iref{class.mem}
+of that class.
 
 \pnum
 A name \tcode{N} used in a class \tcode{S} shall refer to the same
@@ -1319,12 +1331,12 @@ void A::N::f() {
 \end{example}
 
 \pnum
-A name used in the definition of a class \tcode{X} outside of a member
-function body, default argument, \grammarterm{noexcept-specifier},
-default member initializer\iref{class.mem},
-or nested class definition\footnote{This refers to unqualified names
-following the class name; such a name may be used in the
-\grammarterm{base-clause} or may be used in the class definition.}
+A name used in the definition of a class \tcode{X}%
+\footnote{This
+refers to unqualified names following the class name;
+such a name may be used in a \grammarterm{base-specifier} or
+in the \grammarterm{member-specification} of the class definition.}
+outside of a complete-class context\iref{class.mem} of \tcode{X}
 shall be declared in one of the following ways:
 \begin{itemize}
 \item before its use in class \tcode{X} or be a member of a base class
@@ -1385,11 +1397,10 @@ definitions.
 \end{note}
 
 \pnum
-For the members of a class \tcode{X}, a name used in a member function
-body, in a default argument, in a \grammarterm{noexcept-specifier}, in a
-default member initializer\iref{class.mem}, or in the definition of a class member
-outside of the definition of \tcode{X}, following the
-member's
+For the members of a class \tcode{X}, a name used
+in a complete-class context\iref{class.mem} of \tcode{X} or
+in the definition of a class member outside of the definition of \tcode{X},
+following the member's
 \grammarterm{declarator-id}\footnote{That is, an unqualified name that occurs,
 for instance, in a
 type in the
@@ -2307,7 +2318,7 @@ only namespace names are considered.%
 
 \pnum
 \indextext{program}%
-A \defn{program} consists of one or more \defnx{translation units}{translation unit}\iref{lex}
+A \defn{program} consists of one or more translation units\iref{lex}
 linked together. A translation unit consists
 of a sequence of declarations.
 
@@ -3139,7 +3150,7 @@ program~(\ref{basic.start.static}, \ref{basic.start.term}).
 If a variable with static storage duration has initialization or a
 destructor with side effects, it shall not be eliminated even if it
 appears to be unused, except that a class object or its copy/move may be
-eliminated as specified in~\ref{class.copy}.
+eliminated as specified in~\ref{class.copy.elision}.
 
 \pnum
 \indextext{object!local static@local \tcode{static}}%
@@ -3187,7 +3198,7 @@ If a variable with automatic storage duration has initialization or a destructor
 effects, an implementation shall not destroy it before the end of its block
 nor eliminate it as an optimization, even if it appears to be
 unused, except that a class object or its copy/move may be eliminated as
-specified in~\ref{class.copy}.
+specified in~\ref{class.copy.elision}.
 
 \rSec3[basic.stc.dynamic]{Dynamic storage duration}%
 \indextext{storage duration!dynamic|(}
@@ -3353,35 +3364,46 @@ declared in a namespace scope other than global scope or declared static
 in global scope.
 
 \pnum
+A deallocation function
+is a \defn{destroying operator delete}
+if it has at least two parameters
+and its second parameter
+is of type \tcode{std::destroying_delete_t}.
+A destroying operator delete
+shall be a class member function named \tcode{operator delete}.
+\begin{note}
+Array deletion cannot use a destroying operator delete.
+\end{note}
+
+\pnum
 \indextext{\idxcode{delete}!overloading and}%
-Each deallocation function shall return \tcode{void} and its first
+Each deallocation function shall return \tcode{void}.
+If the function is a destroying operator delete
+declared in class type \tcode{C},
+the type of its first parameter shall be \tcode{C*};
+otherwise, the type of its first
 parameter shall be \tcode{void*}. A deallocation function may have more
 than one parameter.
 \indextext{deallocation function!usual}%
-A \defn{usual deallocation function} is a deallocation function that has:
+A \defn{usual deallocation function} is a deallocation function
+whose parameters after the first are
 \begin{itemize}
 \item
-exactly one parameter; or
+optionally, a parameter of type \tcode{std::destroying_delete_t}, then
 \item
-exactly two parameters,
-the type of the second being either
-\tcode{std::align_val_t} or
-\tcode{std::size_t}%
+optionally, a parameter of type \tcode{std::size_t}%
 \footnote{The global \tcode{operator delete(void*, std::size_t)}
 precludes use of an
 allocation function \tcode{void operator new(std::size_t, std::size_t)} as a placement
-allocation function~(\ref{diff.cpp11.basic}).}; or
+allocation function~(\ref{diff.cpp11.basic}).}, then
 \item
-exactly three parameters,
-the type of the second being \tcode{std::size_t}
-and
-the type of the third being \tcode{std::align_val_t}.
+optionally, a parameter of type \tcode{std::align_val_t}.
 \end{itemize}
+A destroying operator delete shall be a usual deallocation function.
 A deallocation function may be an instance of a function
 template. Neither the first parameter nor the return type shall depend
-on a template parameter. \begin{note} That is, a deallocation function
-template shall have a first parameter of type \tcode{void*} and a return
-type of \tcode{void} (as specified above). \end{note} A deallocation
+on a template parameter.
+A deallocation
 function template shall have two or more function parameters. A template
 instance is never a usual deallocation function, regardless of its
 signature.
@@ -3584,6 +3606,369 @@ in the library\iref{meta.trans.other} can be used to obtain aligned storage.
 If a request for a specific extended alignment in a specific context is not
 supported by an implementation, the program is ill-formed.
 
+\rSec2[class.temporary]{Temporary objects}
+
+\pnum
+\indextext{object temporary|see{temporary}}%
+\indextext{temporary}%
+\indextext{optimization of temporary|see{temporary, elimination of}}%
+\indextext{temporary!elimination of}%
+\indextext{temporary!implementation-defined generation of}%
+Temporary objects are created
+\begin{itemize}
+\item
+when a prvalue is materialized so that it can be used as a glvalue\iref{conv.rval},
+\item
+when needed by the implementation to pass or return an object of trivially-copyable type (see below),
+and
+\item
+when throwing an exception\iref{except.throw}.
+\begin{note}
+The lifetime of exception objects is described in~\ref{except.throw}.
+\end{note}
+\end{itemize}
+Even when the creation of the temporary object is
+unevaluated\iref{expr.prop},
+all the semantic restrictions shall be respected as if the temporary object
+had been created and later destroyed.
+\begin{note}
+This includes accessibility\iref{class.access} and whether it is deleted,
+for the constructor selected and for the destructor. However, in the special
+case of the operand of a
+\grammarterm{decltype-specifier}\iref{expr.call}, no temporary is introduced,
+so the foregoing does not apply to such a prvalue.
+\end{note}
+
+\pnum
+The materialization of a temporary object is generally
+delayed as long as possible
+in order to avoid creating unnecessary temporary objects.
+\begin{note}
+Temporary objects are materialized:
+\begin{itemize}
+\item
+when binding a reference to a prvalue~(\ref{dcl.init.ref}, \ref{expr.type.conv},
+\ref{expr.dynamic.cast}, \ref{expr.static.cast}, \ref{expr.const.cast}, \ref{expr.cast}),
+\item
+when performing member access on a class prvalue~(\ref{expr.ref}, \ref{expr.mptr.oper}),
+\item
+when performing an array-to-pointer conversion or subscripting on an array prvalue~(\ref{conv.array}, \ref{expr.sub}),
+\item
+when initializing an object of type \tcode{std::initializer_list<T>} from a \grammarterm{braced-init-list}\iref{dcl.init.list},
+\item
+for certain unevaluated operands~(\ref{expr.typeid}, \ref{expr.sizeof}), and
+\item
+when a prvalue appears as a discarded-value expression\iref{expr.prop}.
+\end{itemize}
+\end{note}
+\begin{example} Consider the following code:
+\begin{codeblock}
+class X {
+public:
+  X(int);
+  X(const X&);
+  X& operator=(const X&);
+  ~X();
+};
+
+class Y {
+public:
+  Y(int);
+  Y(Y&&);
+  ~Y();
+};
+
+X f(X);
+Y g(Y);
+
+void h() {
+  X a(1);
+  X b = f(X(2));
+  Y c = g(Y(3));
+  a = f(a);
+}
+\end{codeblock}
+
+\indextext{class object copy|see{constructor, copy}}%
+\indextext{constructor!copy}%
+\tcode{X(2)} is constructed in the space used to hold \tcode{f()}'s argument and
+\tcode{Y(3)} is constructed in the space used to hold \tcode{g()}'s argument.
+Likewise,
+\tcode{f()}'s result is constructed directly in \tcode{b} and
+\tcode{g()}'s result is constructed directly in \tcode{c}.
+On the other hand, the expression
+\tcode{a = f(a)}
+requires a temporary for
+the result of \tcode{f(a)},
+which is materialized so that the reference parameter
+of \tcode{A::operator=(const A\&)} can bind to it.
+\end{example}
+
+\pnum
+When an object of class type \tcode{X}
+is passed to or returned from a function,
+if each copy constructor, move constructor, and destructor of \tcode{X}
+is either trivial or deleted,
+and \tcode{X}
+has at least one non-deleted copy or move constructor,
+implementations are permitted
+to create a temporary object
+to hold the function parameter or result object.
+The temporary object is constructed
+from the function argument or return value, respectively,
+and the function's parameter or return object
+is initialized as if by
+using the non-deleted trivial constructor to copy the temporary
+(even if that constructor is inaccessible
+or would not be selected by overload resolution
+to perform a copy or move of the object).
+\begin{note}
+This latitude is granted to allow objects of class type to be passed to or returned from functions in registers.
+\end{note}
+
+\pnum
+\indextext{temporary!constructor for}%
+\indextext{temporary!destructor for}%
+\indextext{temporary!destruction of}%
+When an implementation introduces a temporary object of a class that has a
+non-trivial constructor~(\ref{class.ctor}, \ref{class.copy.ctor}),
+it shall ensure that a constructor is called for the temporary object.
+Similarly, the destructor shall be called for a temporary with a non-trivial
+destructor\iref{class.dtor}.
+Temporary objects are destroyed as the last step
+in evaluating
+the full-expression\iref{intro.execution}
+that (lexically) contains the point where
+they were created.
+This is true even if that evaluation ends in throwing an exception.
+The
+\indextext{value computation}%
+value computations and
+\indextext{side effects}%
+side effects of destroying a temporary object
+are associated only with the full-expression, not with any specific
+subexpression.
+
+\pnum
+\indextext{initializer!temporary and declarator}%
+\indextext{temporary!order of destruction of}%
+There are three contexts in which temporaries are destroyed at a different
+point than the end of the full-expression.
+The first context is when a default constructor is called to initialize
+an element of an array with no corresponding initializer\iref{dcl.init}.
+The second context is when a copy constructor is called to copy an element of
+an array while the entire array is copied~(\ref{expr.prim.lambda.capture}, \ref{class.copy.ctor}).
+In either case, if the constructor has one or more default arguments,
+the destruction of every temporary created in a default argument is
+sequenced before the construction of the next array element, if any.
+
+\pnum
+The third context is when a reference is bound to a
+temporary object.\footnote{The same rules apply to initialization of an
+  \tcode{initializer_list} object\iref{dcl.init.list} with its
+  underlying temporary array.}
+The temporary object to which the reference is bound or the temporary object
+that is the complete object of a subobject to which the reference is bound
+persists for the lifetime of the reference if the glvalue
+to which the reference is bound
+was obtained through one of the following:
+\begin{itemize}
+\item
+  a temporary materialization conversion\iref{conv.rval},
+\item
+  \tcode{(} \grammarterm{expression} \tcode{)},
+  where \grammarterm{expression} is one of these expressions,
+\item
+  subscripting\iref{expr.sub} of an array operand,
+  where that operand is one of these expressions,
+\item
+  a class member access\iref{expr.ref} using the \tcode{.} operator
+  where the left operand is one of these expressions and
+  the right operand designates a non-static data member of non-reference type,
+\item
+  a pointer-to-member operation\iref{expr.mptr.oper} using the \tcode{.*} operator
+  where the left operand is one of these expressions and
+  the right operand is a pointer to data member of non-reference type,
+\item
+  a
+  \begin{itemize}
+  \item \tcode{const_cast}\iref{expr.const.cast},
+  \item \tcode{static_cast}\iref{expr.static.cast},
+  \item \tcode{dynamic_cast}\iref{expr.dynamic.cast}, or
+  \item \tcode{reinterpret_cast}\iref{expr.reinterpret.cast}
+  \end{itemize}
+  converting, without a user-defined conversion,
+  a glvalue operand that is one of these expressions
+  to a glvalue that refers
+  to the object designated by the operand, or
+  to its complete object or a subobject thereof,
+\item
+  a conditional expression\iref{expr.cond} that is a glvalue
+  where the second or third operand is one of these expressions, or
+\item
+  a comma expression\iref{expr.comma} that is a glvalue
+  where the right operand is one of these expressions.
+\end{itemize}
+\begin{example}
+\begin{codeblock}
+template<typename T> using id = T;
+
+int i = 1;
+int&& a = id<int[3]>{1, 2, 3}[i];          // temporary array has same lifetime as \tcode{a}
+const int& b = static_cast<const int&>(0); // temporary \tcode{int} has same lifetime as \tcode{b}
+int&& c = cond ? id<int[3]>{1, 2, 3}[i] : static_cast<int&&>(0);
+                                           // exactly one of the two temporaries is lifetime-extended
+\end{codeblock}
+\end{example}
+\begin{note}
+An explicit type conversion~(\ref{expr.type.conv}, \ref{expr.cast})
+is interpreted as
+a sequence of elementary casts,
+covered above.
+\begin{example}
+\begin{codeblock}
+const int& x = (const int&)1;  // temporary for value 1 has same lifetime as x
+\end{codeblock}
+\end{example}
+\end{note}
+\begin{note}
+If a temporary object has a reference member initialized by another temporary object,
+lifetime extension applies recursively to such a member's initializer.
+\begin{example}
+\begin{codeblock}
+struct S {
+  const int& m;
+};
+const S& s = S{1};             // both \tcode{S} and \tcode{int} temporaries have lifetime of \tcode{s}
+\end{codeblock}
+\end{example}
+\end{note}
+
+The exceptions to this lifetime rule are:
+\begin{itemize}
+\item A temporary object bound to a reference parameter in a function call\iref{expr.call}
+persists until the completion of the full-expression containing the call.
+
+\item The lifetime of a temporary bound to the returned value in a function \tcode{return} statement\iref{stmt.return} is not extended; the temporary is destroyed at the end of the full-expression in the \tcode{return} statement.
+
+\item A temporary bound to a reference in a \grammarterm{new-initializer}\iref{expr.new} persists until the completion of the full-expression containing the \grammarterm{new-initializer}.
+\begin{note} This may introduce a dangling reference. \end{note}
+\begin{example}
+\begin{codeblock}
+struct S { int mi; const std::pair<int,int>& mp; };
+S a { 1, {2,3} };
+S* p = new S{ 1, {2,3} };      // creates dangling reference
+\end{codeblock}
+\end{example}
+\end{itemize}
+
+\pnum
+The destruction of a temporary whose lifetime is not extended by being
+bound to a reference is sequenced before the destruction of every
+temporary which is constructed earlier in the same full-expression.
+If the lifetime of two or more temporaries to which references are bound ends
+at the same point,
+these temporaries are destroyed at that point in the reverse order of the
+completion of their construction.
+In addition, the destruction of temporaries bound to references shall
+take into account the ordering of destruction of objects with static, thread, or
+automatic storage duration~(\ref{basic.stc.static}, \ref{basic.stc.thread}, \ref{basic.stc.auto});
+that is, if
+\tcode{obj1}
+is an object with the same storage duration as the temporary and
+created before the temporary is created
+the temporary shall be destroyed before
+\tcode{obj1}
+is destroyed;
+if
+\tcode{obj2}
+is an object with the same storage duration as the temporary and
+created after the temporary is created
+the temporary shall be destroyed after
+\tcode{obj2}
+is destroyed.
+
+\pnum
+\begin{example}
+\begin{codeblock}
+struct S {
+  S();
+  S(int);
+  friend S operator+(const S&, const S&);
+  ~S();
+};
+S obj1;
+const S& cr = S(16)+S(23);
+S obj2;
+\end{codeblock}
+
+The expression
+\tcode{S(16) + S(23)}
+creates three temporaries:
+a first temporary
+\tcode{T1}
+to hold the result of the expression
+\tcode{S(16)},
+a second temporary
+\tcode{T2}
+to hold the result of the expression
+\tcode{S(23)},
+and a third temporary
+\tcode{T3}
+to hold the result of the addition of these two expressions.
+The temporary
+\tcode{T3}
+is then bound to the reference
+\tcode{cr}.
+It is unspecified whether
+\tcode{T1}
+or
+\tcode{T2}
+is created first.
+On an implementation where
+\tcode{T1}
+is created before
+\tcode{T2},
+\tcode{T2}
+shall be destroyed before
+\tcode{T1}.
+The temporaries
+\tcode{T1}
+and
+\tcode{T2}
+are bound to the reference parameters of
+\tcode{operator+};
+these temporaries are destroyed at the end of the full-expression
+containing the call to
+\tcode{operator+}.
+The temporary
+\tcode{T3}
+bound to the reference
+\tcode{cr}
+is destroyed at the end of
+\tcode{cr}'s
+lifetime, that is, at the end of the program.
+In addition, the order in which
+\tcode{T3}
+is destroyed takes into account the destruction order of other objects with
+static storage duration.
+That is, because
+\tcode{obj1}
+is constructed before
+\tcode{T3},
+and
+\tcode{T3}
+is constructed before
+\tcode{obj2},
+\tcode{obj2}
+shall be destroyed before
+\tcode{T3},
+and
+\tcode{T3}
+shall be destroyed before
+\tcode{obj1}.
+\end{example}
+
 \rSec1[basic.types]{Types}%
 \indextext{type|(}
 
@@ -3728,22 +4113,24 @@ An \defn{object type} is a (possibly cv-qualified) type that is not
 a function type, not a reference type, and not \cv{}~\tcode{void}.
 
 \pnum
-Arithmetic types\iref{basic.fundamental}, enumeration types, pointer
-types, pointer-to-member types\iref{basic.compound},
+\indextext{class!trivial}%
+\indextext{class!trivially copyable}%
+\indextext{class!standard-layout}%
+Arithmetic types\iref{basic.fundamental}, enumeration types,
+pointer types, pointer-to-member types\iref{basic.compound},
 \tcode{std::nullptr_t},
 and
 cv-qualified\iref{basic.type.qualifier} versions of these
 types are collectively called
 \defnx{scalar types}{scalar type}.
-Cv-unqualified scalar types, trivially copyable class types\iref{class}, arrays of
-such types, and cv-qualified versions of these
-types are collectively called \defn{trivially
-copyable types}.
-Scalar types, trivial class types\iref{class},
+Cv-unqualified scalar types, trivially copyable class types\iref{class.prop},
+arrays of such types, and cv-qualified versions of these
+types are collectively called \defn{trivially copyable types}.
+Scalar types, trivial class types\iref{class.prop},
 arrays of such types and cv-qualified versions of these
 types are collectively called
 \defn{trivial types}. Scalar types, standard-layout class
-types\iref{class}, arrays of such types and
+types\iref{class.prop}, arrays of such types and
 cv-qualified versions of these types
 are collectively called \defn{standard-layout types}.
 
@@ -3789,7 +4176,6 @@ layout-compatible standard-layout class types\iref{class.mem}.
 \rSec2[basic.fundamental]{Fundamental types}
 
 \pnum
-\indextext{type!fundamental}%
 \indextext{type!integral}%
 \indextext{floating-point type|see{type, floating-point}}%
 \indextext{type!implementation-defined \tcode{sizeof}}%
@@ -4025,8 +4411,11 @@ pointer-to-member conversions~(\ref{conv.ptr}, \ref{conv.mem}).
 \tcode{sizeof(std::nullptr_t)} shall be equal to \tcode{sizeof(void*)}.
 
 \pnum
+\indextext{type!fundamental}%
+The types described in this subclause
+are called \defnx{fundamental types}{fundamental type}.
 \begin{note}
-Even if the implementation defines two or more basic types to have the
+Even if the implementation defines two or more fundamental types to have the
 same value representation, they are nevertheless different types.
 \end{note}
 
@@ -4050,8 +4439,8 @@ static members of classes) of a given type, \ref{dcl.ptr};
 \defnx{references}{reference} to objects or functions of a given
 type, \ref{dcl.ref}. There are two types of references:
 \begin{itemize}
-\item \defn{lvalue reference}
-\item \defn{rvalue reference}
+\item lvalue reference
+\item rvalue reference
 \end{itemize}
 
 \item
@@ -4162,7 +4551,7 @@ the other is a non-static data member of that object\iref{class.union}, or
 one is a standard-layout class object and
 the other is the first non-static data member of that object, or,
 if the object has no non-static data members,
-the first base class subobject of that object\iref{class.mem}, or
+any base class subobject of that object\iref{class.mem}, or
 \item
 there exists an object \placeholder{c} such that
 \placeholder{a} and \placeholder{c} are pointer-interconvertible, and
@@ -5491,9 +5880,10 @@ It is \impldef{threads and program points at which deferred dynamic initializati
 in which threads and at which points in the program such deferred dynamic initialization occurs.
 
 \pnum
-If the initialization of a non-local variable with static or thread storage duration
-exits via
-an exception, \tcode{std::terminate} is called\iref{except.terminate}.%
+If the initialization of
+a non-local variable with static or thread storage duration
+exits via an exception,
+the function \tcode{std::terminate} is called\iref{except.terminate}.%
 \indextext{program!start|)}
 
 \rSec3[basic.start.term]{Termination}
@@ -5539,7 +5929,7 @@ object with static storage duration initialized during the construction
 of the subobjects is destroyed.
 If the destruction of an object with static or thread storage duration
 exits via an exception,
-\tcode{std::terminate} is called\iref{except.terminate}.
+the function \tcode{std::terminate} is called\iref{except.terminate}.
 
 \pnum
 If a function contains a block-scope object of static or thread storage duration that has been

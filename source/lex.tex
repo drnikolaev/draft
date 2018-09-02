@@ -544,7 +544,7 @@ token.%
 \indextext{name}%
 An identifier is an arbitrarily long sequence of letters and digits.
 Each \grammarterm{universal-character-name} in an identifier shall designate a
-character whose encoding in ISO 10646 falls into one of the ranges
+character whose encoding in ISO/IEC 10646 falls into one of the ranges
 specified in \tref{charname.allowed}.
 The initial element shall not be a \grammarterm{universal-character-name}
 designating a character whose encoding falls into one of the ranges
@@ -629,10 +629,12 @@ Unless otherwise specified, any ambiguity as to whether a given
 token as a regular \grammarterm{identifier}.
 
 \begin{floattable}{Identifiers with special meaning}{tab:identifiers.special}
-{ll}
+{llll}
 \topline
-\tcode{override}        &
-\tcode{final}           \\
+\tcode{audit}           &
+\tcode{axiom}           &
+\tcode{final}           &
+\tcode{override}        \\
 \end{floattable}
 
 \pnum
@@ -1139,7 +1141,7 @@ begins with \tcode{u8}, such as \tcode{u8'w'},
 is a character literal of type \tcode{char},
 known as a \defn{UTF-8 character literal}.
 The value of a UTF-8 character literal
-is equal to its ISO 10646 code point value,
+is equal to its ISO/IEC 10646 code point value,
 provided that the code point value
 is representable with a single UTF-8 code unit
 (that is, provided it is in the C0 Controls and Basic Latin Unicode block).
@@ -1156,7 +1158,7 @@ begins with the letter \tcode{u}, such as \tcode{u'x'},
 \indextext{prefix!\idxcode{u}}%
 is a character literal of type \tcode{char16_t}. The value
 of a \tcode{char16_t} character literal containing a single \grammarterm{c-char} is
-equal to its ISO 10646 code point value, provided that the code point value is
+equal to its ISO/IEC 10646 code point value, provided that the code point value is
 representable with a single 16-bit code unit (that is, provided it is in the
 basic multi-lingual plane). If the value is not representable
 with a single 16-bit code unit, the program is ill-formed. A \tcode{char16_t} character literal
@@ -1171,7 +1173,7 @@ begins with the letter \tcode{U}, such as \tcode{U'y'},
 \indextext{prefix!\idxcode{U}}%
 is a character literal of type \tcode{char32_t}. The value of a
 \tcode{char32_t} character literal containing a single \grammarterm{c-char} is equal
-to its ISO 10646 code point value. A \tcode{char32_t} character literal containing
+to its ISO/IEC 10646 code point value. A \tcode{char32_t} character literal containing
 multiple \grammarterm{c-char}{s} is ill-formed.
 
 \pnum
@@ -1786,17 +1788,17 @@ the form
 operator "" @\placeholder{X}@(@\placeholder{n}@ULL)
 \end{codeblock}
 
-Otherwise, \placeholder{S} shall contain a raw literal operator or a literal operator
-template\iref{over.literal} but not both. If \placeholder{S} contains a raw literal operator,
+Otherwise, \placeholder{S} shall contain a raw literal operator
+or a numeric literal operator template\iref{over.literal} but not both.
+If \placeholder{S} contains a raw literal operator,
 the literal \placeholder{L} is treated as a call of the form
 
 \begin{codeblock}
 operator "" @\placeholder{X}@(@"\placeholder{n}{"}@)
 \end{codeblock}
 
-Otherwise (\placeholder{S} contains a literal operator template), \placeholder{L} is treated as a call
-of the form
-
+Otherwise (\placeholder{S} contains a numeric literal operator template),
+\placeholder{L} is treated as a call of the form
 
 \begin{codeblock}
 operator "" @\placeholder{X}@<'@$c_1$@', '@$c_2$@', ... '@$c_k$@'>()
@@ -1816,16 +1818,17 @@ the form
 operator "" @\placeholder{X}@(@\placeholder{f}@L)
 \end{codeblock}
 
-Otherwise, \placeholder{S} shall contain a raw literal operator or a literal operator
-template\iref{over.literal} but not both. If \placeholder{S} contains a raw literal operator,
+Otherwise, \placeholder{S} shall contain a raw literal operator
+or a numeric literal operator template\iref{over.literal} but not both.
+If \placeholder{S} contains a raw literal operator,
 the \grammarterm{literal} \placeholder{L} is treated as a call of the form
 
 \begin{codeblock}
 operator "" @\placeholder{X}@(@"\placeholder{f}{"}@)
 \end{codeblock}
 
-Otherwise (\placeholder{S} contains a literal operator template), \placeholder{L} is treated as a call
-of the form
+Otherwise (\placeholder{S} contains a numeric literal operator template),
+\placeholder{L} is treated as a call of the form
 
 \begin{codeblock}
 operator "" @\placeholder{X}@<'@$c_1$@', '@$c_2$@', ... '@$c_k$@'>()
@@ -1836,12 +1839,20 @@ $c_1c_2...c_k$ can only contain characters from the basic source character set.
 \end{note}
 
 \pnum
-If \placeholder{L} is a \grammarterm{user-defined-string-literal}, let \placeholder{str} be the
-literal without its \grammarterm{ud-suffix} and let \placeholder{len} be
-the number of
-code units in \placeholder{str} (i.e., its length excluding the terminating
-null character).
- The literal \placeholder{L} is treated as a call of the form
+If \placeholder{L} is a \grammarterm{user-defined-string-literal},
+let \placeholder{str} be the literal without its \grammarterm{ud-suffix}
+and let \placeholder{len} be the number of code units in \placeholder{str}
+(i.e., its length excluding the terminating null character).
+If \placeholder{S} contains a literal operator template with
+a non-type template parameter for which \placeholder{str} is
+a well-formed \grammarterm{template-argument},
+the literal \placeholder{L} is treated as a call of the form
+
+\begin{codeblock}
+operator "" @\placeholder{X}@<@\placeholder{str}{}@>()
+\end{codeblock}
+
+Otherwise, the literal \placeholder{L} is treated as a call of the form
 
 \begin{codeblock}
 operator "" @\placeholder{X}@(@\placeholder{str}{}@, @\placeholder{len}{}@)

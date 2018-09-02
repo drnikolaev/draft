@@ -50,6 +50,8 @@ Information interchange --- Representation of dates and times}
 \item ISO/IEC 9899:2011, \doccite{Programming languages --- C}
 \item ISO/IEC 9945:2003, \doccite{Information Technology --- Portable
 Operating System Interface (POSIX)}
+\item ISO/IEC 10646, \doccite{Information technology ---
+Universal Coded Character Set (UCS)}
 \item ISO/IEC 10646-1:1993, \doccite{Information technology ---
 Universal Multiple-Octet Coded Character Set (UCS) --- Part 1:
 Architecture and Basic Multilingual Plane}
@@ -77,6 +79,12 @@ The ECMAScript Language Specification described in Standard Ecma-262 is
 hereinafter called \defn{ECMA-262}.
 \indextext{references!normative|)}
 
+\pnum
+\begin{note}
+References to ISO/IEC 10646-1:1993 are used only
+to support deprecated features\iref{depr.locale.stdcvt}.
+\end{note}
+
 \rSec0[intro.defs]{Terms and definitions}
 
 \pnum
@@ -93,7 +101,7 @@ ISO and IEC maintain terminological databases
 for use in standardization
 at the following addresses:
 \begin{itemize}
-\item ISO Online browsing platform: available at \url{http://www.iso.org/obp}
+\item ISO Online browsing platform: available at \url{https://www.iso.org/obp}
 \item IEC Electropedia: available at \url{http://www.electropedia.org/}
 \end{itemize}
 
@@ -477,8 +485,8 @@ value is not used and that no
 side effects affecting the
 observable behavior of the program are produced.}
 
-\indextext{behavior!implementation-defined}%
 \pnum
+\indextext{behavior!implementation-defined}%
 Certain aspects and operations of the abstract machine are described in this
 document as implementation-defined (for example,
 \tcode{sizeof(int)}). These constitute the parameters of the abstract machine.
@@ -489,8 +497,8 @@ See~\ref{intro.compliance}.} Such documentation shall define the instance of the
 abstract machine that corresponds to that implementation (referred to as the
 ``corresponding instance'' below).
 
-\indextext{behavior!unspecified}%
 \pnum
+\indextext{behavior!unspecified}%
 Certain other aspects and operations of the abstract machine are
 described in this document as unspecified (for example,
 order of evaluation of arguments in a function call\iref{expr.call}).
@@ -500,17 +508,17 @@ define the nondeterministic aspects of the abstract machine. An instance
 of the abstract machine can thus have more than one possible execution
 for a given program and a given input.
 
-\indextext{behavior!undefined}%
 \pnum
+\indextext{behavior!undefined}%
 Certain other operations are described in this document as
 undefined (for example, the effect of
 attempting to modify a const object).
 \begin{note} This document imposes no requirements on the
 behavior of programs that contain undefined behavior. \end{note}
 
+\pnum
 \indextext{program!well-formed}%
 \indextext{behavior!observable}%
-\pnum
 A conforming implementation executing a well-formed program shall
 produce the same observable behavior as one of the possible executions
 of the corresponding instance of the abstract machine with the
@@ -521,8 +529,8 @@ requirement on the implementation executing that program with that input
 (not even with regard to operations preceding the first undefined
 operation).
 
-\indextext{conformance requirements}
 \pnum
+\indextext{conformance requirements}%
 The least requirements on a conforming implementation are:
 \begin{itemize}
 \item

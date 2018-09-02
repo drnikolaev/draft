@@ -248,7 +248,7 @@ widespread commercially.
 \howwide
 Common.
 
-\diffref{expr.post.incr}, \ref{expr.pre.incr}
+\diffrefs{expr.post.incr}{expr.pre.incr}
 \change
 Decrement operator is not allowed with \tcode{bool} operand.
 \rationale Feature with surprising semantics.
@@ -256,7 +256,7 @@ Decrement operator is not allowed with \tcode{bool} operand.
 a \tcode{bool} lvalue (for instance, via the C typedef in \tcode{<stdbool.h>})
 is ill-formed in this International Standard.
 
-\diffref{expr.sizeof}, \ref{expr.cast}
+\diffrefs{expr.sizeof}{expr.cast}
 \change Types must be defined in declarations, not in expressions.\\
 In C, a sizeof expression or cast expression may define a new type.
 For example,
@@ -274,15 +274,15 @@ Syntactic transformation.
 \howwide
 Seldom.
 
-\diffref{expr.cond}, \ref{expr.ass}, \ref{expr.comma}
+\diffrefs{expr.cond}{expr.ass}, \ref{expr.comma}
 \indextext{conversion!lvalue-to-rvalue}%
 \indextext{rvalue!lvalue conversion to}%
 \indextext{lvalue}%
 \change The result of a conditional expression, an assignment expression, or a comma expression may be an lvalue.
 \rationale
 \Cpp{} is an object-oriented language, placing relatively
-more emphasis on lvalues.  For example, functions may
-return lvalues.
+more emphasis on lvalues.  For example, function calls may
+yield lvalues.
 \effect
 Change to semantics of well-defined feature.  Some C
 expressions that implicitly rely on lvalue-to-rvalue
@@ -305,7 +305,7 @@ Rare.
 
 \rSec2[diff.stat]{\ref{stmt.stmt}: statements}
 
-\diffref{stmt.switch}, \ref{stmt.goto}
+\diffrefs{stmt.switch}{stmt.goto}
 \change It is now invalid to jump past a declaration with explicit or implicit initializer (except across entire block not entered).
 \rationale
 Constructors used in initializers may allocate
@@ -790,7 +790,7 @@ Seldom.
 
 \rSec2[diff.special]{\ref{special}: special member functions}
 
-\diffref{class.copy}
+\diffref{class.copy.ctor}
 \change Copying volatile objects.
 
 The implicitly-declared copy constructor and
@@ -993,7 +993,7 @@ int x[] = { 2.0 };
 
 \rSec2[diff.cpp03.special]{\ref{special}: special member functions}
 
-\diffref{class.ctor}, \ref{class.dtor}, \ref{class.copy}
+\diffrefs{class.ctor}{class.dtor}, \ref{class.copy.ctor}, \ref{class.copy.assign}
 \change Implicitly-declared special member functions are defined as deleted
 when the implicit definition would have been ill-formed.
 \rationale Improves template argument deduction failure.
@@ -1085,13 +1085,9 @@ The following \Cpp{} headers are new:
 and
 \tcode{<unordered_set>}.
 In addition the following C compatibility headers are new:
-\tcode{<ccomplex>},
 \tcode{<cfenv>},
 \tcode{<cinttypes>},
-\tcode{<cstdalign>},
-\tcode{<cstdbool>},
 \tcode{<cstdint>},
-\tcode{<ctgmath>},
 and
 \tcode{<cuchar>}.
 Valid \CppIII{} code that \tcode{\#include}{s} headers with these names may be
@@ -1124,40 +1120,6 @@ International Standard.
 language support library}
 
 \diffref{new.delete.single}
-\change Linking \tcode{new} and \tcode{delete} operators.
-\rationale The two throwing single-object signatures of \tcode{operator new} and
-\tcode{operator delete} are now specified to form the base functionality for
-the other operators. This clarifies that replacing just these two signatures
-changes others, even if they are not explicitly changed.
-\effect
-Valid \CppIII{} code that replaces global \tcode{new} or \tcode{delete}
-operators may execute differently in this International Standard. For
-example, the following program should write \tcode{"custom deallocation"} twice,
-once for the single-object delete and once for the array delete.
-
-\begin{codeblock}
-#include <cstdio>
-#include <cstdlib>
-#include <new>
-
-void* operator new(std::size_t size) throw(std::bad_alloc) {
-  return std::malloc(size);
-}
-
-void operator delete(void* ptr) throw() {
-  std::puts("custom deallocation");
-  std::free(ptr);
-}
-
-int main() {
-  int* i = new int;
-  delete i;                     // single-object delete
-  int* a = new int[3];
-  delete [] a;                  // array delete
-}
-\end{codeblock}
-
-\diffref{new.delete.single}
 \change \tcode{operator new} may throw exceptions other than
 \tcode{std::bad_alloc}.
 \rationale Consistent application of \tcode{noexcept}.
@@ -1165,6 +1127,10 @@ int main() {
 Valid \CppIII{} code that assumes that global \tcode{operator new} only
 throws \tcode{std::bad_alloc} may execute differently in this International
 Standard.
+Valid \CppIII{} code that replaces the global replaceable \tcode{operator new}
+is ill-formed in this International Standard,
+because the exception specification of \tcode{throw(std::bad_alloc)}
+was removed.
 
 \rSec2[diff.cpp03.diagnostics]{\ref{diagnostics}: diagnostics library}
 
@@ -1185,8 +1151,8 @@ Valid \CppIII{} code, compiled without traceable pointer support,
 that interacts with newer \Cpp{} code using regions declared reachable may
 have different runtime behavior.
 
-\diffref{refwrap}, \ref{arithmetic.operations}, \ref{comparisons},
-\ref{logical.operations}, \ref{bitwise.operations}, \ref{depr.negators}
+\diffrefs{refwrap}{arithmetic.operations}, \ref{comparisons},
+\ref{logical.operations}, \ref{bitwise.operations}
 \change Standard function object types no longer derived from
 \tcode{std::unary_function} or \tcode{std::binary_function}.
 \rationale Superseded by new feature; \tcode{unary_function} and
@@ -1247,7 +1213,7 @@ of \tcode{size() == 0};
 Valid \CppIII{} code that attempts to explicitly instantiate a container using
 a user-defined type with no default constructor may fail to compile.
 
-\diffref{sequence.reqmts}, \ref{associative.reqmts}
+\diffrefs{sequence.reqmts}{associative.reqmts}
 \change Signature changes: from \tcode{void} return types.
 \rationale Old signature threw away useful information that may be expensive
 to recalculate.
@@ -1264,7 +1230,7 @@ Valid \CppIII{} code that relies on these functions returning \tcode{void}
 (e.g., code that creates a pointer to member function that points to one
 of these functions) will fail to compile with this International Standard.
 
-\diffref{sequence.reqmts}, \ref{associative.reqmts}
+\diffrefs{sequence.reqmts}{associative.reqmts}
 \change Signature changes: from \tcode{iterator} to \tcode{const_iterator}
 parameters.
 \rationale Overspecification.
@@ -1285,7 +1251,7 @@ The signatures of the following member functions changed from taking an
 Valid \CppIII{} code that uses these functions may fail to compile with this
 International Standard.
 
-\diffref{sequence.reqmts}, \ref{associative.reqmts}
+\diffrefs{sequence.reqmts}{associative.reqmts}
 \change Signature changes: \tcode{resize}.
 \rationale Performance, compatibility with move semantics.
 \effect
@@ -1319,7 +1285,7 @@ binary representation of the required template specializations of
 
 \rSec2[diff.cpp03.input.output]{\ref{input.output}: input/output library}
 
-\diffref{istream::sentry}, \ref{ostream::sentry}, \ref{iostate.flags}
+\diffrefs{istream::sentry}{ostream::sentry}, \ref{iostate.flags}
 \change Specify use of \tcode{explicit} in existing boolean conversion functions.
 \rationale Clarify intentions, avoid workarounds.
 \effect
@@ -1543,7 +1509,7 @@ int b0p = F(0p+0);  // ill-formed; equivalent to ``\tcode{int b0p = b0p + 0;}\!'
 
 \rSec2[diff.cpp14.expr]{\ref{expr}: expressions}
 
-\diffref{expr.post.incr}, \ref{expr.pre.incr}
+\diffrefs{expr.post.incr}{expr.pre.incr}
 \change
 Remove increment operator with \tcode{bool} operand.
 \rationale Obsolete feature with occasionally surprising semantics.
@@ -1552,7 +1518,7 @@ a \tcode{bool} lvalue is ill-formed in this International Standard.
 Note that this might occur when the lvalue has a type given by a template
 parameter.
 
-\diffref{expr.new}, \ref{expr.delete}
+\diffrefs{expr.new}{expr.delete}
 \change Dynamic allocation mechanism for over-aligned types.
 \rationale Simplify use of over-aligned types.
 \effect In \CppXIV{} code that uses a \grammarterm{new-expression}
@@ -1800,6 +1766,7 @@ int main() {
 
 \rSec2[diff.cpp14.depr]{\ref{depr}: compatibility features}
 
+\nodiffref
 \change
 The class templates
 \tcode{auto_ptr},
@@ -1818,6 +1785,7 @@ are not defined.
 \effect Valid \CppXIV{} code that uses these class templates
 and function templates may fail to compile in this International Standard.
 
+\nodiffref
 \change
 Remove old iostreams members [depr.ios.members].
 \rationale Redundant feature for compatibility with pre-standard code
@@ -1872,7 +1840,71 @@ that were not captured in \CppXVII{}
 if those entities are only referenced in contexts
 that do not result in an odr-use.
 
+\rSec2[diff.cpp17.dcl.decl]{\ref{dcl.decl}: declarators}
+
+\diffref{dcl.init.aggr}
+\change A class that has user-declared constructors is never an aggregate.
+\rationale Remove potentially error-prone aggregate initialization
+which may apply notwithstanding the declared constructors of a class.
+\effect Valid \CppXVII{} code that aggregate-initializes
+a type with a user-declared constructor
+may be ill-formed or have different semantics
+in this International Standard.
+\begin{codeblock}
+struct A {              // not an aggregate; previously an aggregate
+  A() = delete;
+};
+
+struct B {              // not an aggregate; previously an aggregate
+  B() = default;
+  int i = 0;
+};
+
+struct C {              // not an aggregate; previously an aggregate
+  C(C&&) = default;
+  int a, b;
+};
+
+A a{};                  // ill-formed; previously well-formed
+B b = {1};              // ill-formed; previously well-formed
+auto* c = new C{2, 3};  // ill-formed; previously well-formed
+
+struct Y;
+
+struct X {
+  operator Y();
+};
+
+struct Y {              // not an aggregate; previously an aggregate
+  Y(const Y&) = default;
+  X x;
+};
+
+Y y{X{}};               // copy constructor call; previously aggregate-initialization
+\end{codeblock}
+
 \rSec2[diff.cpp17.special]{\ref{special}: special member functions}
+
+\diffrefs{class.ctor}{class.conv.fct}
+\change
+The class name can no longer be used parenthesized
+immediately after an \tcode{explicit} \grammarterm{decl-specifier}
+in a constructor declaration.
+The \grammarterm{conversion-function-id} can no longer be used parenthesized
+immediately after an \tcode{explicit} \grammarterm{decl-specifier}
+in a conversion function declaration.
+\rationale
+Necessary for new functionality.
+\effect
+Valid \CppXVII{} code may fail to compile
+in this International Standard. For example:
+\begin{codeblock}
+struct S {
+  explicit (S)(const S&);       // ill-formed; previously well-formed
+  explicit (operator int)();    // ill-formed; previously well-formed
+  explicit(true) (S)(int);      // OK
+};
+\end{codeblock}
 
 \diffrefs{class.ctor}{class.dtor}
 \change
@@ -1923,6 +1955,26 @@ int main() {
 }
 \end{codeblock}
 
+\rSec2[diff.cpp17.except]{\ref{except}: exception handling}
+
+\diffref{except.spec}
+\change Remove \tcode{throw()} exception specification.
+\rationale
+Removal of obsolete feature that has been replaced by \tcode{noexcept}.
+\effect
+A valid \CppXVII{} function declaration, member function declaration, function
+pointer declaration, or function reference declaration that uses \tcode{throw()}
+for its exception specification will be rejected as ill-formed in this
+International Standard. It should simply be replaced with \tcode{noexcept} for no
+change of meaning since \CppXVII{}.
+\begin{note}
+There is no way to write a function declaration
+that is non-throwing in this International Standard
+and is also non-throwing in \CppIII{}
+except by using the preprocessor to generate
+a different token sequence in each case.
+\end{note}
+
 \rSec2[diff.cpp17.library]{\ref{library}: library introduction}
 
 \diffref{headers}
@@ -1930,12 +1982,139 @@ int main() {
 \rationale New functionality.
 \effect
 The following \Cpp{} headers are new:
+\tcode{<bit>},
 \tcode{<compare>},
+\tcode{<concepts>},
+\tcode{<contract>},
 \tcode{<span>},
 \tcode{<syncstream>}, and
 \tcode{<version>}.
 Valid \CppXVII{} code that \tcode{\#include}{s} headers with these names may be
 invalid in this International Standard.
+
+\diffref{headers}
+\change Remove vacuous \Cpp{} header files.
+\rationale
+The empty headers implied a false requirement to achieve C compatibility with the \Cpp{} headers.
+\effect
+A valid \CppXVII{} program that \tcode{\#include}{s} any of the following headers may fail to compile:
+\tcode{<ccomplex>},
+\tcode{<ciso646>},
+\tcode{<cstdalign>},
+\tcode{<cstdbool>}, and
+\tcode{<ctgmath>}.
+To retain the same behavior:
+\begin{itemize}
+\item
+a \tcode{\#include} of \tcode{<ccomplex>} can be replaced by
+a \tcode{\#include} of \tcode{<complex>}\iref{complex.syn},
+\item
+a \tcode{\#include} of \tcode{<ctgmath>} can be replaced by
+a \tcode{\#include} of \tcode{<cmath>}\iref{cmath.syn} and
+a \tcode{\#include} of \tcode{<complex>},
+and
+\item
+a \tcode{\#include} of
+\tcode{<ciso646>},
+\tcode{<cstdalign>}, or
+\tcode{<cstdbool>}
+can simply be removed.
+\end{itemize}
+
+\rSec2[diff.cpp17.containers]{\ref{containers}: containers library}
+
+\diffrefs{forwardlist}{list}
+\change
+Return types of \tcode{remove}, \tcode{remove_if}, and \tcode{unique}
+changed from \tcode{void} to \tcode{container::size_type}.
+\rationale Improve efficiency and convenience of finding number of removed elements.
+\effect
+Code that depends on the return types might have different semantics in this International Standard.
+Translation units compiled against this version of \Cpp{} may be incompatible with
+translation units compiled against \CppXVII{}, either failing to link or having undefined behavior.
+
+\rSec2[diff.cpp17.depr]{\ref{depr}: compatibility features}
+
+\nodiffref
+\change Remove \tcode{uncaught_exception}.
+\rationale
+The function did not have a clear specification when multiple exceptions were
+active, and has been superseded by \tcode{uncaught_exceptions}.
+\effect
+A valid \CppXVII{} program that calls \tcode{std::uncaught_exception} may fail
+to compile. It might be revised to use \tcode{std::uncaught_exceptions} instead,
+for clear and portable semantics.
+
+\nodiffref
+\change Remove support for adaptable function API.
+\rationale
+The deprecated support relied on a limited convention that could not be
+extended to support the general case or new language features. It has been
+superseded by direct language support with \tcode{decltype}, and by the
+\tcode{std::bind} and \tcode{std::not_fn} function templates.
+\effect
+A valid \CppXVII{} program that relies on the presence of \tcode{result_type},
+\tcode{argument_type}, \tcode{first_argument_type}, or
+\tcode{second_argument_type} in a standard library class may fail to compile. A
+valid \CppXVII{} program that calls \tcode{not1} or \tcode{not2}, or uses the
+class templates \tcode{unary_negate} or \tcode{binary_negate}, may fail to
+compile.
+
+\nodiffref
+\change Remove redundant members from \tcode{std::allocator}.
+\rationale
+\tcode{std::allocator} was overspecified, encouraging direct usage in user containers
+rather than relying on \tcode{std::allocator_traits}, leading to poor containers.
+\effect
+A valid \CppXVII{} program that directly makes use of the \tcode{pointer},
+\tcode{const_pointer}, \tcode{reference}, \tcode{const_reference},
+\tcode{rebind}, \tcode{address}, \tcode{construct}, \tcode{destroy}, or
+\tcode{max_size} members of \tcode{std::allocator}, or that directly calls
+\tcode{allocate} with an additional hint argument, may fail to compile.
+
+\nodiffref
+\change Remove \tcode{raw_storage_iterator}.
+\rationale
+The iterator encouraged use of algorithms that might throw exceptions, but did
+not return the number of elements successfully constructed that might need to
+be destroyed in order to avoid leaks.
+\effect
+A valid \CppXVII{} program that uses this iterator class may fail to compile.
+
+\nodiffref
+\change Remove temporary buffers API.
+\rationale
+The temporary buffer facility was intended to provide an efficient optimization
+for small memory requests, but there is little evidence this was achieved in
+practice, while requiring the user to provide their own exception-safe wrappers
+to guard use of the facility in many cases.
+\effect
+A valid \CppXVII{} program that calls \tcode{get_temporary_buffer} or
+\tcode{return_temporary_buffer} may fail to compile.
+
+\nodiffref
+\change Remove \tcode{shared_ptr::unique}.
+\rationale
+The result of a call to this member function is not reliable in the presence of
+multiple threads and weak pointers. The member function \tcode{use_count} is
+similarly unreliable, but has a clearer contract in such cases, and remains
+available for well defined use in single-threaded cases.
+\effect
+A valid \CppXVII{} program that calls \tcode{unique} on a \tcode{shared_ptr}
+object may fail to compile.
+
+\diffref{depr.meta.types}
+\change Remove deprecated type traits.
+\rationale
+The traits had unreliable or awkward interfaces. The \tcode{is_literal_type}
+trait provided no way to detect which subset of constructors and member
+functions of a type were declared \tcode{constexpr}. The \tcode{result_of}
+trait had a surprising syntax that could not report the result of a regular
+function type. It has been superseded by the \tcode{invoke_result} trait.
+\effect
+A valid \CppXVII{} program that relies on the \tcode{is_literal_type} or
+\tcode{result_of} type traits, on the \tcode{is_literal_type_v} variable template,
+or on the \tcode{result_of_t} alias template may fail to compile.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \rSec1[diff.library]{C standard library}
@@ -1955,27 +2134,17 @@ the \Cpp{} standard library provides the C headers enumerated
 in~\ref{depr.c.headers}, but their use is deprecated in \Cpp{}.
 
 \pnum
-There are no \Cpp{} headers for the C headers
+There are no \Cpp{} headers for the C standard library's headers
 \tcode{<stdatomic.h>}\indextext{\idxhdr{stdatomic.h}!absence thereof},
 \tcode{<stdnoreturn.h>}\indextext{\idxhdr{stdnoreturn.h}!absence thereof},
 and \tcode{<threads.h>}\indextext{\idxhdr{threads.h}!absence thereof},
-nor are the C headers themselves part of \Cpp{}.
+nor are these headers from the C standard library headers themselves part of \Cpp{}.
 
 \pnum
-The \Cpp{} headers \tcode{<ccomplex>}\indexhdr{ccomplex}\iref{depr.ccomplex.syn}
-and \tcode{<ctgmath>}\indexhdr{ctgmath}\iref{depr.ctgmath.syn}, as well
-as their corresponding C headers \tcode{<complex.h>}\indexhdr{complex.h}
-and \tcode{<tgmath.h>}\indexhdr{tgmath.h}, do not contain any of the
-content from the C standard library and instead merely include other headers
-from the \Cpp{} standard library.
-
-\pnum
-The headers \tcode{<ciso646>}\indexhdr{ciso646},
-\tcode{<cstdalign>}\indexhdr{cstdalign}\iref{depr.cstdalign.syn},
-and \tcode{<cstdbool>}\indexhdr{cstdbool}\iref{depr.cstdbool.syn}
-are meaningless in \Cpp{}. Use of
-the \Cpp{} headers \tcode{<ccomplex>}, \tcode{<cstdalign>}, \tcode{<cstdbool>},
-and \tcode{<ctgmath>} is deprecated\iref{depr.c.headers}.
+The C headers \tcode{<complex.h>}\indexhdr{complex.h} and
+\tcode{<tgmath.h>}\indexhdr{tgmath.h} do not contain any of the content from
+the C standard library and instead merely include other headers from the \Cpp{}
+standard library.
 
 \rSec2[diff.mods.to.definitions]{Modifications to definitions}
 
@@ -2027,27 +2196,27 @@ The tokens
 and
 \tcode{xor_eq}
 are keywords in this International
-Standard\iref{lex.key}.
-They do not appear as macro names defined in
-\tcode{<ciso646>}.
-\indexhdr{ciso646}%
+Standard\iref{lex.key},
+and are not introduced as macros
+by \tcode{<iso646.h>}\iref{depr.iso646.h.syn}.
 
 \rSec3[diff.header.stdalign.h]{Header \tcode{<stdalign.h>}}
 \indexhdr{stdalign.h}%
 
 \pnum
 The token \tcode{alignas} is a keyword in this International
-Standard\iref{lex.key}. It does not appear as a macro name defined
-in \tcode{<cstdalign>}\indexhdr{cstdalign}\iref{depr.cstdalign.syn}.
+Standard\iref{lex.key},
+and is not introduced as a macro
+by \tcode{<stdalign.h>}\iref{depr.stdalign.h.syn}.
 
 \rSec3[diff.header.stdbool.h]{Header \tcode{<stdbool.h>}}
 \indexhdr{stdbool.h}%
 
 \pnum
 The tokens \tcode{bool}, \tcode{true}, and \tcode{false}
-are keywords in this International Standard\iref{lex.key}.
-They do not appear as macro names defined in
-\tcode{<cstdbool>}\indexhdr{cstdbool}\iref{depr.cstdbool.syn}.
+are keywords in this International Standard\iref{lex.key},
+and are not introduced as macros
+by \tcode{<stdbool.h>}\iref{depr.stdbool.h.syn}.
 
 \rSec3[diff.null]{Macro \tcode{NULL}}
 
